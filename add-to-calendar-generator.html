@@ -3,191 +3,196 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Add to Calendar — Generator</title>
+<!-- CSP: no inline event handlers, no external scripts, no eval -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'unsafe-inline'; img-src data:; connect-src 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta http-equiv="Referrer-Policy" content="no-referrer"/>
+<title>Add to Calendar Generator</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>
+/* ===================== RESET + TOKENS ===================== */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0a0a0d;
-  --s1:#111116;
-  --s2:#18181f;
-  --s3:#21212b;
-  --b1:#2c2c3a;
-  --b2:#3d3d50;
-  --acc:#e8ff47;
-  --acc2:#c8e000;
-  --acc-dim:rgba(232,255,71,0.12);
-  --red:#ff5f5f;
-  --grn:#4ade80;
-  --blue:#60a5fa;
-  --txt:#f2f1fa;
-  --t2:#9998b3;
-  --t3:#5f5e78;
-  --mono:'Fira Code',monospace;
-  --head:'Syne',sans-serif;
-  --body:'DM Sans',sans-serif;
-  --r:8px;
+  --bg:#0a0a0d; --s1:#111116; --s2:#18181f; --s3:#21212b;
+  --b1:#2c2c3a; --b2:#3d3d50;
+  --acc:#EA0029; --acc2:#88051c; --acc-dim:rgba(234,0,41,.12);
+  --red:#ff5f5f; --grn:#4ade80; --blue:#60a5fa;
+  --txt:#f2f1fa; --t2:#9998b3; --t3:#5f5e78;
+  --mono:'Fira Code',monospace; --head:'Syne',sans-serif; --body:'DM Sans',sans-serif;
+  --r:8px; --left-w:380px;
 }
-body{background:var(--bg);color:var(--txt);font-family:var(--body);min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--txt);font-family:var(--body);display:flex;flex-direction:column;}
 
-/* HEADER */
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+
+/* ===================== HEADER ===================== */
 header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 28px;border-bottom:1px solid var(--b1);
-  background:var(--s1);flex-shrink:0;
+  padding:12px 20px;border-bottom:1px solid var(--b1);
+  background:var(--s1);flex-shrink:0;z-index:10;
 }
-.hd-left{display:flex;align-items:center;gap:12px;}
-.logo{width:32px;height:32px;background:var(--acc);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-.site-title{font-family:var(--head);font-size:16px;font-weight:700;letter-spacing:-0.3px;}
+.hd-left{display:flex;align-items:center;gap:10px;}
+.logo{width:30px;height:30px;background:var(--acc);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.site-title{font-family:var(--head);font-size:15px;font-weight:700;letter-spacing:-.3px;}
 .site-title span{color:var(--acc);}
-.hd-right{display:flex;gap:8px;align-items:center;}
-
-/* PILL BADGE */
-.badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;letter-spacing:0.3px;}
-.badge-acc{background:var(--acc-dim);color:var(--acc);border:1px solid rgba(232,255,71,0.3);}
+.hd-right{display:flex;gap:6px;align-items:center;}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.3px;font-family:var(--head);}
+.badge-acc{background:var(--acc-dim);color:var(--acc);border:1px solid rgba(232,255,71,.3);}
 .badge-gray{background:var(--s3);color:var(--t2);border:1px solid var(--b1);}
 
-/* LAYOUT */
-.app{flex:1;display:grid;grid-template-columns:380px 1fr;overflow:hidden;}
+/* mobile hamburger */
+.hamburger{display:none;background:none;border:1px solid var(--b1);color:var(--t2);padding:6px 9px;border-radius:6px;cursor:pointer;font-size:16px;line-height:1;}
 
-/* =================== LEFT PANEL =================== */
-.left{border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden;background:var(--s1);}
+/* ===================== LAYOUT ===================== */
+.app{flex:1;display:grid;grid-template-columns:var(--left-w) 1fr;overflow:hidden;position:relative;}
 
+/* ===================== LEFT PANEL ===================== */
+.left{
+  border-right:1px solid var(--b1);display:flex;flex-direction:column;
+  overflow:hidden;background:var(--s1);transition:transform .25s ease;
+}
 .left-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;}
-.lt{flex:1;padding:12px 0;text-align:center;font-size:12px;font-weight:600;font-family:var(--head);letter-spacing:0.5px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.lt{flex:1;padding:11px 0;text-align:center;font-size:11px;font-weight:700;font-family:var(--head);
+  letter-spacing:.6px;text-transform:uppercase;color:var(--t3);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;}
 .lt:hover{color:var(--t2);}
 .lt.active{color:var(--acc);border-bottom-color:var(--acc);}
+.left-body{flex:1;overflow-y:auto;padding:18px;}
+.lp{display:none;} .lp.active{display:block;}
 
-.left-body{flex:1;overflow-y:auto;padding:20px;}
-.left-body::-webkit-scrollbar{width:4px;}
-.left-body::-webkit-scrollbar-track{background:transparent;}
-.left-body::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
-
-.lp{display:none;}
-.lp.active{display:block;}
-
-/* SECTION */
-.sec{margin-bottom:22px;}
-.sec-label{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t3);margin-bottom:10px;}
-
-/* FIELDS */
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+/* ===================== FORMS ===================== */
+.sec{margin-bottom:20px;}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--t3);margin-bottom:9px;}
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--t2);margin-bottom:4px;}
 input[type=text],input[type=datetime-local],textarea,select{
-  width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
-  color:var(--txt);font-family:var(--body);font-size:13px;padding:9px 12px;outline:none;transition:border .15s;
+  width:100%;background:var(--txt);border:1px solid var(--s2);border-radius:var(--r);
+  color:var(--bg);font-family:var(--body);font-size:13px;padding:8px 11px;outline:none;transition:border .15s;
 }
 input:focus,textarea:focus,select:focus{border-color:var(--acc);}
-textarea{resize:vertical;min-height:72px;line-height:1.55;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-
-.color-row{display:flex;gap:8px;align-items:center;}
-input[type=color]{width:40px;height:36px;padding:2px 3px;border-radius:6px;cursor:pointer;background:var(--s2);border:1px solid var(--b1);}
+textarea{resize:vertical;min-height:68px;line-height:1.5;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.color-row{display:flex;gap:7px;align-items:center;}
+input[type=color]{width:38px;height:34px;padding:2px 3px;border-radius:6px;cursor:pointer;background:var(--s2);border:1px solid var(--b1);flex-shrink:0;}
 .color-row input[type=text]{flex:1;font-family:var(--mono);font-size:12px;}
 
 /* STYLE PICKER */
-.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-.so{border:1px solid var(--b1);border-radius:var(--r);padding:10px 6px;text-align:center;font-size:11px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--head);}
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.so{border:1px solid var(--b1);border-radius:var(--r);padding:9px 5px;text-align:center;font-size:11px;font-weight:600;
+  color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--head);background:none;}
 .so:hover{border-color:var(--b2);color:var(--txt);}
 .so.active{border-color:var(--acc);background:var(--acc-dim);color:var(--acc);}
-.so .pb{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;margin-bottom:5px;pointer-events:none;font-family:var(--body);}
+.so .pb{display:inline-block;font-size:10px;font-weight:700;padding:3px 7px;margin-bottom:5px;pointer-events:none;font-family:var(--body);}
 .so.sf .pb{background:#e8ff47;color:#000;border-radius:3px;}
 .so.so2 .pb{border:1.5px solid #e8ff47;color:#e8ff47;border-radius:3px;}
 .so.sp .pb{background:#e8ff47;color:#000;border-radius:20px;}
 
-/* BTN */
-.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r);font-family:var(--head);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:0.2px;}
-.btn-acc{background:var(--acc);color:#000;}
-.btn-acc:hover{background:var(--acc2);}
-.btn-ghost{background:var(--s3);color:var(--txt);border:1px solid var(--b1);}
-.btn-ghost:hover{border-color:var(--b2);}
-.btn-red{background:rgba(255,95,95,0.12);color:var(--red);border:1px solid rgba(255,95,95,0.25);}
-.btn-red:hover{background:rgba(255,95,95,0.2);}
-.btn-sm{padding:6px 12px;font-size:11px;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:var(--r);
+  font-family:var(--head);font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:.2px;}
+.btn-acc{background:var(--acc);color:#000;} .btn-acc:hover{background:var(--acc2);}
+.btn-ghost{background:var(--s3);color:var(--txt);border:1px solid var(--b1);} .btn-ghost:hover{border-color:var(--b2);}
 .btn-full{width:100%;justify-content:center;}
+.btn-sm{padding:5px 11px;font-size:11px;}
+.copied{background:rgba(74,222,128,.15)!important;color:var(--grn)!important;border-color:rgba(74,222,128,.3)!important;}
 
 /* EVENT LIST */
-.ev-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-.ev-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;}
+.ev-list{display:flex;flex-direction:column;gap:7px;margin-bottom:12px;}
+.ev-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:all .15s;position:relative;}
 .ev-card:hover{border-color:var(--b2);}
 .ev-card.selected{border-color:var(--acc);background:var(--acc-dim);}
-.ev-card-title{font-family:var(--head);font-size:13px;font-weight:600;margin-bottom:3px;padding-right:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-card-title{font-family:var(--head);font-size:13px;font-weight:600;margin-bottom:2px;padding-right:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ev-card-meta{font-size:11px;color:var(--t2);}
-.ev-card-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;}
-.icon-btn{background:none;border:none;color:var(--t3);cursor:pointer;padding:3px;border-radius:4px;transition:all .15s;font-size:13px;line-height:1;}
+.ev-card-actions{position:absolute;top:9px;right:9px;display:flex;gap:3px;}
+.icon-btn{background:none;border:none;color:var(--t3);cursor:pointer;padding:3px;border-radius:4px;transition:all .15s;font-size:12px;line-height:1;}
 .icon-btn:hover{color:var(--txt);background:var(--s3);}
-.ev-empty{text-align:center;padding:28px 0;color:var(--t3);font-size:13px;}
+.ev-empty{text-align:center;padding:24px 0;color:var(--t3);font-size:12px;}
+hr.div{border:none;border-top:1px solid var(--b1);margin:14px 0;}
 
-/* ICS DROP ZONE */
+/* DROP ZONE */
 .drop-zone{
-  border:2px dashed var(--b2);border-radius:var(--r);padding:28px;text-align:center;
+  border:2px dashed var(--b2);border-radius:var(--r);padding:24px;text-align:center;
   cursor:pointer;transition:all .2s;background:var(--s2);
 }
 .drop-zone:hover,.drop-zone.drag{border-color:var(--acc);background:var(--acc-dim);}
-.drop-zone svg{margin-bottom:10px;opacity:.5;}
-.drop-zone p{font-size:13px;color:var(--t2);line-height:1.6;}
-.drop-zone span{font-size:11px;color:var(--t3);}
+.drop-zone svg{margin-bottom:8px;opacity:.5;}
+.drop-zone p{font-size:13px;color:var(--t2);line-height:1.55;}
+.drop-zone small{font-size:11px;color:var(--t3);}
 #icsFileInput{display:none;}
-.import-results{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
-.imp-row{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.imp-row-info{flex:1;min-width:0;}
-.imp-row-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.imp-row-meta{font-size:10px;color:var(--t3);margin-top:2px;}
-.imp-row-actions{display:flex;gap:4px;flex-shrink:0;}
+.import-results{margin-top:12px;display:flex;flex-direction:column;gap:5px;}
+.imp-row{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.imp-title{flex:1;font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.imp-meta{font-size:10px;color:var(--t3);margin-top:2px;}
+.err-box{background:rgba(255,95,95,.1);border:1px solid rgba(255,95,95,.3);border-radius:6px;padding:10px 13px;font-size:12px;color:var(--red);margin-top:10px;}
 
-/* =================== RIGHT PANEL =================== */
+/* ===================== RIGHT PANEL ===================== */
 .right{display:flex;flex-direction:column;overflow:hidden;}
-
-.right-tabs{display:flex;border-bottom:1px solid var(--b1);padding:0 28px;flex-shrink:0;background:var(--s1);}
-.rt{padding:14px 16px;font-size:12px;font-weight:600;font-family:var(--head);letter-spacing:0.4px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
-.rt:hover{color:var(--t2);}
-.rt.active{color:var(--acc);border-bottom-color:var(--acc);}
-
-.rpanel{display:none;flex:1;flex-direction:column;overflow:hidden;padding:24px 28px;}
+.right-tabs{display:flex;border-bottom:1px solid var(--b1);padding:0 22px;flex-shrink:0;background:var(--s1);}
+.rt{padding:13px 14px;font-size:11px;font-weight:700;font-family:var(--head);letter-spacing:.4px;text-transform:uppercase;
+  color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;}
+.rt:hover{color:var(--t2);} .rt.active{color:var(--acc);border-bottom-color:var(--acc);}
+.rpanel{display:none;flex:1;flex-direction:column;overflow:hidden;padding:20px 22px;}
 .rpanel.active{display:flex;}
 
 /* PREVIEW */
-.preview-bg{flex:1;background:#fff;border-radius:var(--r);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;}
-#previewMount{text-align:center;font-family:Arial,sans-serif;max-width:520px;width:100%;}
+.preview-bg{flex:1;background:#fff;border-radius:var(--r);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;}
+#previewMount{font-family:Arial,sans-serif;max-width:500px;width:100%;text-align:center;}
 
 /* CODE */
-.code-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;}
+.code-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0;}
 .code-file{font-family:var(--mono);font-size:11px;color:var(--t3);}
 .code-out{
   flex:1;overflow:auto;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
-  padding:18px 20px;font-family:var(--mono);font-size:12px;line-height:1.75;color:#b0aecf;
-  white-space:pre;
+  padding:16px 18px;font-family:var(--mono);font-size:12px;line-height:1.75;color:#b0aecf;white-space:pre;
 }
-.code-out::-webkit-scrollbar{width:4px;height:4px;}
-.code-out::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
 
-/* OUTPUT MODE TOGGLE */
-.mode-toggle{display:flex;gap:0;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:3px;margin-bottom:16px;flex-shrink:0;}
-.mt{flex:1;text-align:center;padding:6px 10px;font-size:11px;font-weight:600;font-family:var(--head);letter-spacing:0.3px;color:var(--t2);cursor:pointer;border-radius:6px;transition:all .15s;}
+/* MODE TOGGLE */
+.mode-toggle{display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:3px;margin-bottom:12px;flex-shrink:0;}
+.mt{flex:1;text-align:center;padding:5px 8px;font-size:11px;font-weight:700;font-family:var(--head);
+  letter-spacing:.3px;color:var(--t2);cursor:pointer;border-radius:6px;transition:all .15s;border:none;background:none;}
 .mt.active{background:var(--acc);color:#000;}
 
-/* COPY BTN state */
-.copied{background:rgba(74,222,128,0.15)!important;color:var(--grn)!important;border-color:rgba(74,222,128,0.3)!important;}
+/* ===================== MOBILE DRAWER ===================== */
+@media(max-width:720px){
+  html,body{overflow:auto;}
+  body{overflow:hidden;}
+  .app{grid-template-columns:1fr;overflow:visible;}
+  .hamburger{display:block;}
+  .left{
+    position:fixed;top:0;left:0;bottom:0;width:min(var(--left-w),92vw);z-index:200;
+    transform:translateX(-110%);box-shadow:4px 0 30px rgba(0,0,0,.6);
+  }
+  .left.open{transform:translateX(0);}
+  .right{height:calc(100vh - 47px);overflow:hidden;}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:199;}
+  .overlay.show{display:block;}
+  .rpanel{padding:14px;}
+  .right-tabs{padding:0 14px;}
+  .preview-bg{padding:20px 12px;}
+}
 
-/* SCROLLBAR GLOBAL */
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-thumb{background:var(--b2);}
+@media(min-width:721px) and (max-width:1100px){
+  :root{--left-w:320px;}
+}
 
-/* DIVIDER */
-hr.div{border:none;border-top:1px solid var(--b1);margin:16px 0;}
-
-/* TAG */
-.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:20px;font-family:var(--head);font-weight:600;letter-spacing:.4px;}
-.tag-green{background:rgba(74,222,128,.1);color:var(--grn);border:1px solid rgba(74,222,128,.2);}
-.tag-blue{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2);}
+/* ===================== NOTICE ===================== */
+.security-note{
+  font-size:11px;color:var(--t3);padding:8px 12px;background:var(--s2);
+  border:1px solid var(--b1);border-radius:6px;margin-bottom:14px;line-height:1.5;
+}
+.security-note strong{color:var(--grn);}
 </style>
 </head>
 <body>
 
 <header>
   <div class="hd-left">
-    <div class="logo">📅</div>
-    <span class="site-title">CalGen<span>.</span></span>
+    <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">☰</button>
+    <div class="logo" aria-hidden="true">📅</div>
+    <span class="site-title">Add To Calendar Generator<span>.</span></span>
   </div>
   <div class="hd-right">
     <span class="badge badge-gray" id="evCountBadge">0 events</span>
@@ -195,314 +200,344 @@ hr.div{border:none;border-top:1px solid var(--b1);margin:16px 0;}
   </div>
 </header>
 
+<!-- Mobile overlay -->
+<div class="overlay" id="overlay"></div>
+
 <div class="app">
 
   <!-- ===== LEFT ===== -->
-  <div class="left">
+  <div class="left" id="leftPanel">
     <div class="left-tabs">
-      <div class="lt active" onclick="switchLeft('events',this)">Events</div>
-      <div class="lt" onclick="switchLeft('style',this)">Style</div>
-      <div class="lt" onclick="switchLeft('import',this)">Import .ics</div>
+      <button class="lt active" id="ltEvents" aria-selected="true">Events</button>
+      <button class="lt" id="ltStyle" aria-selected="false">Style</button>
+      <button class="lt" id="ltImport" aria-selected="false">Import .ics</button>
     </div>
 
-    <!-- EVENTS TAB -->
+    <!-- EVENTS -->
     <div class="left-body lp active" id="lp-events">
-
       <div class="sec">
         <div class="sec-label">Event list</div>
-        <div class="ev-list" id="evList"></div>
-        <button class="btn btn-acc btn-full" onclick="addEvent()">+ Add Event</button>
+        <div class="ev-list" id="evList" role="list"></div>
+        <button class="btn btn-acc btn-full" id="addEventBtn">+ Add Event</button>
       </div>
-
       <hr class="div"/>
-
-      <!-- EDIT FORM -->
-      <div id="evForm" style="display:none;">
-        <div class="sec-label" id="formTitle">Edit Event</div>
-        <div class="field"><label>Title</label><input type="text" id="fTitle" placeholder="My Event"/></div>
-        <div class="field"><label>Location / URL</label><input type="text" id="fLoc" placeholder="https://..."/></div>
+      <div id="evForm" style="display:none;" aria-label="Event editor">
+        <div class="sec-label" id="formHeading">New Event</div>
+        <div class="field"><label for="fTitle">Title <span style="color:var(--red)">*</span></label><input type="text" id="fTitle" maxlength="200" autocomplete="off"/></div>
+        <div class="field"><label for="fLoc">Location / URL</label><input type="text" id="fLoc" maxlength="500" autocomplete="off"/></div>
         <div class="row2">
-          <div class="field"><label>Start</label><input type="datetime-local" id="fStart"/></div>
-          <div class="field"><label>End</label><input type="datetime-local" id="fEnd"/></div>
+          <div class="field"><label for="fStart">Start</label><input type="datetime-local" id="fStart"/></div>
+          <div class="field"><label for="fEnd">End</label><input type="datetime-local" id="fEnd"/></div>
         </div>
-        <div class="field"><label>Description</label><textarea id="fDesc" placeholder="Optional"></textarea></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-acc" style="flex:1;" onclick="saveEvent()">Save Event</button>
-          <button class="btn btn-ghost" onclick="cancelEdit()">Cancel</button>
+        <div class="field"><label for="fDesc">Description</label><textarea id="fDesc" maxlength="1000"></textarea></div>
+        <div id="formError" style="display:none;" class="err-box" role="alert"></div>
+        <div style="display:flex;gap:7px;">
+          <button class="btn btn-acc" style="flex:1;" id="saveEventBtn">Save Event</button>
+          <button class="btn btn-ghost" id="cancelEditBtn">Cancel</button>
         </div>
       </div>
-
     </div>
 
-    <!-- STYLE TAB -->
+    <!-- STYLE -->
     <div class="left-body lp" id="lp-style">
-
       <div class="sec">
         <div class="sec-label">Button style</div>
         <div class="style-grid">
-          <div class="so sf active" data-s="filled" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Filled</div>
-          <div class="so so2" data-s="outline" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Outline</div>
-          <div class="so sp" data-s="pill" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Pill</div>
+          <button class="so sf active" data-s="filled">
+            <div><span class="pb">+ Add</span></div>Filled
+          </button>
+          <button class="so so2" data-s="outline">
+            <div><span class="pb">+ Add</span></div>Outline
+          </button>
+          <button class="so sp" data-s="pill">
+            <div><span class="pb">+ Add</span></div>Pill
+          </button>
         </div>
       </div>
-
       <div class="sec">
         <div class="sec-label">Colors</div>
-        <div class="field"><label>Button background</label>
-          <div class="color-row">
-            <input type="color" id="cBgP" value="#0055CC" oninput="syncC('cBg','cBgP')"/>
-            <input type="text" id="cBg" value="#0055CC" maxlength="7" oninput="syncC('cBgP','cBg')"/>
-          </div>
-        </div>
-        <div class="field"><label>Button text</label>
-          <div class="color-row">
-            <input type="color" id="cFgP" value="#ffffff" oninput="syncC('cFg','cFgP')"/>
-            <input type="text" id="cFg" value="#ffffff" maxlength="7" oninput="syncC('cFgP','cFg')"/>
-          </div>
-        </div>
-        <div class="field"><label>Link color</label>
-          <div class="color-row">
-            <input type="color" id="cLkP" value="#0055CC" oninput="syncC('cLk','cLkP')"/>
-            <input type="text" id="cLk" value="#0055CC" maxlength="7" oninput="syncC('cLkP','cLk')"/>
-          </div>
-        </div>
+        <div class="field"><label for="cBg">Button background</label>
+          <div class="color-row"><input type="color" id="cBgP" value="#0055CC"/><input type="text" id="cBg" value="#0055CC" maxlength="7"/></div></div>
+        <div class="field"><label for="cFg">Button text</label>
+          <div class="color-row"><input type="color" id="cFgP" value="#ffffff"/><input type="text" id="cFg" value="#ffffff" maxlength="7"/></div></div>
+        <div class="field"><label for="cLk">Link color</label>
+          <div class="color-row"><input type="color" id="cLkP" value="#0055CC"/><input type="text" id="cLk" value="#0055CC" maxlength="7"/></div></div>
       </div>
-
       <div class="sec">
         <div class="sec-label">Button label</div>
-        <div class="field"><input type="text" id="btnLabel" value="📅 Add to Calendar" oninput="render()"/></div>
+        <div class="field"><input type="text" id="btnLabel" value="📅 Add to Calendar" maxlength="80"/></div>
       </div>
-
     </div>
 
-    <!-- IMPORT TAB -->
+    <!-- IMPORT -->
     <div class="left-body lp" id="lp-import">
+      <div class="security-note">
+        <strong>🔒 Processed locally.</strong> Your .ics file never leaves your browser — no uploads, no server.
+      </div>
       <div class="sec">
         <div class="sec-label">Import .ics file</div>
-        <div class="drop-zone" id="dropZone" onclick="document.getElementById('icsFileInput').click()" ondragover="dzDrag(event,true)" ondragleave="dzDrag(event,false)" ondrop="dzDrop(event)">
-          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 0L8 8m4-4l4 4"/></svg>
+        <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Drop .ics file or click to browse">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 0L8 8m4-4l4 4"/></svg>
           <p>Drop a .ics file here<br/>or click to browse</p>
-          <span>Supports single and multi-event files</span>
+          <small>Max 2MB · Single or multi-event files</small>
         </div>
-        <input type="file" id="icsFileInput" accept=".ics,.ical,text/calendar" onchange="handleIcsFile(this.files[0])"/>
+        <input type="file" id="icsFileInput" accept=".ics,.ical,text/calendar"/>
       </div>
-      <div id="importResults" class="import-results"></div>
+      <div id="importResults" class="import-results" aria-live="polite"></div>
     </div>
-
   </div>
 
   <!-- ===== RIGHT ===== -->
   <div class="right">
-    <div class="right-tabs">
-      <div class="rt active" onclick="switchRight('preview',this)">Preview</div>
-      <div class="rt" onclick="switchRight('snippet',this)">Snippet</div>
-      <div class="rt" onclick="switchRight('full',this)">Full Email</div>
+    <div class="right-tabs" role="tablist">
+      <button class="rt active" id="rtPreview">Preview</button>
+      <button class="rt" id="rtSnippet">Snippet</button>
+      <button class="rt" id="rtFull">Full Email</button>
     </div>
 
-    <!-- PREVIEW -->
-    <div class="rpanel active" id="rp-preview">
-      <p style="font-size:12px;color:var(--t3);margin-bottom:16px;flex-shrink:0;">White background — as it appears in email clients</p>
-      <div class="preview-bg"><div id="previewMount"></div></div>
+    <div class="rpanel active" id="rp-preview" role="tabpanel">
+      <p style="font-size:11px;color:var(--t3);margin-bottom:12px;flex-shrink:0;">White background preview — as rendered in email clients</p>
+      <div class="preview-bg"><div id="previewMount" aria-live="polite"></div></div>
     </div>
 
-    <!-- SNIPPET -->
-    <div class="rpanel" id="rp-snippet">
-      <div class="mode-toggle" id="snippetModeToggle">
-        <div class="mt active" data-mode="separate" onclick="pickMode('snippet',this)">One per event</div>
-        <div class="mt" data-mode="combined" onclick="pickMode('snippet',this)">Combined block</div>
+    <div class="rpanel" id="rp-snippet" role="tabpanel">
+      <div class="mode-toggle" id="snippetModeToggle" role="group" aria-label="Output mode">
+        <button class="mt active" data-mode="separate">One per event</button>
+        <button class="mt" data-mode="combined">Combined block</button>
       </div>
       <div class="code-toolbar">
         <span class="code-file">snippet.html</span>
-        <button class="btn btn-ghost btn-sm" id="copySnippetBtn" onclick="copyOut('snippet')">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <button class="btn btn-ghost btn-sm" id="copySnippetBtn">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           Copy
         </button>
       </div>
-      <div class="code-out" id="snippetOut"></div>
+      <div class="code-out" id="snippetOut" aria-label="Generated snippet HTML" tabindex="0"></div>
     </div>
 
-    <!-- FULL EMAIL -->
-    <div class="rpanel" id="rp-full">
-      <div class="mode-toggle" id="fullModeToggle">
-        <div class="mt active" data-mode="separate" onclick="pickMode('full',this)">One per event</div>
-        <div class="mt" data-mode="combined" onclick="pickMode('full',this)">Combined block</div>
+    <div class="rpanel" id="rp-full" role="tabpanel">
+      <div class="mode-toggle" id="fullModeToggle" role="group" aria-label="Output mode">
+        <button class="mt active" data-mode="separate">One per event</button>
+        <button class="mt" data-mode="combined">Combined block</button>
       </div>
       <div class="code-toolbar">
         <span class="code-file">email-template.html</span>
-        <button class="btn btn-ghost btn-sm" id="copyFullBtn" onclick="copyOut('full')">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <button class="btn btn-ghost btn-sm" id="copyFullBtn">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
           Copy
         </button>
       </div>
-      <div class="code-out" id="fullOut"></div>
+      <div class="code-out" id="fullOut" aria-label="Generated full email HTML" tabindex="0"></div>
     </div>
-
   </div>
 </div>
 
 <script>
-// ==================== STATE ====================
-let events = [
-  { id:1, title:'Q3 Product Webinar', loc:'https://zoom.us/j/12345', start:'2026-06-15T14:00', end:'2026-06-15T15:00', desc:'Join us for an overview of the latest product updates and a live Q&A.' }
-];
-let nextId = 2;
-let editingId = null;
-let snippetMode = 'separate';
-let fullMode = 'separate';
+'use strict';
 
-// ==================== HELPERS ====================
+/* ============================================================
+   SECURITY UTILITIES  (OWASP-aligned)
+   ============================================================ */
+
+// 1. HTML-escape every string before inserting into DOM via innerHTML
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','`':'&#x60;'};
+function esc(s){ return String(s==null?'':s).replace(/[&<>"'`]/g, c=>ESC_MAP[c]); }
+
+// 2. Sanitize a URL — only allow http/https/mailto; reject javascript:, data:, vbscript: etc.
+function safeUrl(url){
+  if(!url) return '';
+  const s = String(url).trim();
+  if(/^(https?:\/\/|mailto:)/i.test(s)) return s;
+  return '';
+}
+
+// 3. Strip non-printable / control characters from plain text fields
+function sanitizeText(s, maxLen=500){
+  return String(s==null?'':s)
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,'')
+    .slice(0,maxLen);
+}
+
+// 4. Validate a hex color — returns fallback if invalid
+function safeColor(s, fallback='#000000'){
+  return /^#[0-9A-Fa-f]{6}$/.test(String(s||'').trim()) ? String(s).trim() : fallback;
+}
+
+// 5. File validation constants
+const MAX_FILE_BYTES = 2 * 1024 * 1024;    // 2 MB
+const ALLOWED_MIME   = ['text/calendar','application/ics','text/plain',''];
+const MAX_EVENTS     = 50;                  // never parse more than 50 events from one file
+const MAX_FIELD_LEN  = 1000;               // per ICS field
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let events      = [];
+let nextId      = 1;
+let editingId   = null;
+let snippetMode = 'separate';
+let fullMode    = 'separate';
+let _importBuf  = [];
+
+/* ============================================================
+   DATE / URL HELPERS
+   ============================================================ */
 const pad = n => String(n).padStart(2,'0');
 function toUtc(d){ return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z'; }
-function fmtDate(s){
-  const d = new Date(s);
-  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-}
-function fmtTime(s){
-  const d = new Date(s);
-  return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-}
-function getStyle(){ return document.querySelector('.so.active')?.dataset.s || 'filled'; }
-function getColor(id){ return document.getElementById(id)?.value || '#0055CC'; }
-function getLabel(){ return document.getElementById('btnLabel')?.value || 'Add to Calendar'; }
+function fmtDate(s){ try{ return new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }catch{ return s||''; } }
+function fmtTime(s){ try{ return new Date(s).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }catch{ return ''; } }
 
 function buildUrls(ev){
   const s = new Date(ev.start), e = new Date(ev.end);
+  if(isNaN(s)||isNaN(e)) return null;
   const se = toUtc(s)+'/'+toUtc(e);
-  const google  = 'https://www.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.title)+'&dates='+se+'&location='+encodeURIComponent(ev.loc||'')+'&details='+encodeURIComponent(ev.desc||'');
-  const outlook = 'https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&subject='+encodeURIComponent(ev.title)+'&startdt='+s.toISOString()+'&enddt='+e.toISOString()+'&location='+encodeURIComponent(ev.loc||'')+'&body='+encodeURIComponent(ev.desc||'');
-  const dur = Math.round((e-s)/60000);
-  const yahoo = 'https://calendar.yahoo.com/?v=60&title='+encodeURIComponent(ev.title)+'&st='+toUtc(s)+'&dur='+String(Math.floor(dur/60)).padStart(2,'0')+String(dur%60).padStart(2,'0')+'&in_loc='+encodeURIComponent(ev.loc||'')+'&desc='+encodeURIComponent(ev.desc||'');
-  const icsData = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CalGen//EN','BEGIN:VEVENT','DTSTART:'+toUtc(s),'DTEND:'+toUtc(e),'SUMMARY:'+(ev.title||'').replace(/,/g,'\\,'),'DESCRIPTION:'+(ev.desc||'').replace(/,/g,'\\,').replace(/\n/g,'\\n'),'LOCATION:'+(ev.loc||'').replace(/,/g,'\\,'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
-  const ics = 'data:text/calendar;charset=utf8,'+encodeURIComponent(icsData);
-  return { google, outlook, yahoo, ics };
+  const t  = encodeURIComponent(ev.title||'');
+  const lo = encodeURIComponent(ev.loc||'');
+  const de = encodeURIComponent(ev.desc||'');
+  const dur = Math.max(0, Math.round((e-s)/60000));
+  const icsBody = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CalGen//EN',
+    'BEGIN:VEVENT',
+    'DTSTART:'+toUtc(s),'DTEND:'+toUtc(e),
+    'SUMMARY:'+(ev.title||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'),
+    'DESCRIPTION:'+(ev.desc||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'),
+    'LOCATION:'+(ev.loc||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,'),
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  return {
+    google:  `https://www.google.com/calendar/render?action=TEMPLATE&text=${t}&dates=${se}&location=${lo}&details=${de}`,
+    outlook: `https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&subject=${t}&startdt=${s.toISOString()}&enddt=${e.toISOString()}&location=${lo}&body=${de}`,
+    yahoo:   `https://calendar.yahoo.com/?v=60&title=${t}&st=${toUtc(s)}&dur=${pad(Math.floor(dur/60))}${pad(dur%60)}&in_loc=${lo}&desc=${de}`,
+    ics:     'data:text/calendar;charset=utf8,'+encodeURIComponent(icsBody)
+  };
 }
 
-function btnCSS(raw){
-  const bg = getColor('cBg'), fg = getColor('cFg'), sty = getStyle();
-  const r   = sty==='pill' ? '999px' : '4px';
-  const bgS = sty==='outline' ? 'background-color:transparent;' : `background-color:${bg};`;
-  const bdr = sty==='outline' ? `border:2px solid ${bg};` : '';
-  const fgS = sty==='outline' ? `color:${bg};` : `color:${fg};`;
-  const td  = `${bgS}${bdr}border-radius:${r};padding:13px 28px;`;
-  const a   = `${fgS}font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;display:inline-block;`;
-  return { td, a };
+/* ============================================================
+   STYLE HELPERS
+   ============================================================ */
+function getStyle(){ return document.querySelector('.so.active')?.dataset.s||'filled'; }
+function getC(id){ return safeColor(document.getElementById(id)?.value,'#0055CC'); }
+function getLabel(){ return sanitizeText(document.getElementById('btnLabel')?.value||'Add to Calendar',80); }
+
+function btnCSS(){
+  const bg=getC('cBg'), sty=getStyle();
+  const r   = sty==='pill'?'999px':'4px';
+  const bgS = sty==='outline'?'background-color:transparent;':`background-color:${bg};`;
+  const bdr = sty==='outline'?`border:2px solid ${bg};`:'';
+  const fgC = sty==='outline'?bg:getC('cFg');
+  return {
+    td: `${bgS}${bdr}border-radius:${r};padding:13px 28px;`,
+    a:  `color:${fgC};font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;display:inline-block;`
+  };
 }
 
-function amp(s){ return s.replace(/&/g,'&amp;'); }
-
-// ==================== SNIPPET BUILDER ====================
+/* ============================================================
+   SNIPPET / EMAIL BUILDERS
+   (All user content is run through esc() before innerHTML,
+    or appended as textContent — no raw string injection)
+   ============================================================ */
 function buildOneSnippet(ev, raw){
   const urls = buildUrls(ev);
-  const {td, a} = btnCSS();
-  const lk = getColor('cLk'), lb = getLabel();
-  const g  = raw ? urls.google  : amp(urls.google);
-  const o  = raw ? urls.outlook : amp(urls.outlook);
-  const y  = raw ? urls.yahoo   : amp(urls.yahoo);
-  return `<!-- [${ev.title}] Add to Calendar -->
+  if(!urls) return `<!-- Skipped "${ev.title}" — invalid dates -->`;
+  const {td,a} = btnCSS();
+  const lk = getC('cLk'), lb = getLabel();
+  const g  = raw?urls.google :urls.google.replace(/&/g,'&amp;');
+  const o  = raw?urls.outlook:urls.outlook.replace(/&/g,'&amp;');
+  const y  = raw?urls.yahoo  :urls.yahoo.replace(/&/g,'&amp;');
+  // title is inserted as a comment — esc it to prevent comment injection
+  const safeTitle = (ev.title||'').replace(/-->/g,'--&gt;');
+  return `<!-- [${safeTitle}] Add to Calendar -->
 <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
   <tr><td align="center">
     <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
       <td style="${td}">
         <!--[if mso]><a href="${g}" style="${a}"><![endif]-->
-        <a href="${g}" style="${a}" target="_blank">${lb}</a>
+        <a href="${g}" style="${a}" target="_blank" rel="noopener noreferrer">${lb}</a>
         <!--[if mso]></a><![endif]-->
       </td>
     </tr></table>
     <p style="font-family:Arial,sans-serif;font-size:12px;color:#888888;margin:10px 0 0;">
       Add to:
-      <a href="${g}" style="color:${lk};" target="_blank">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank">Yahoo</a>
+      <a href="${g}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Yahoo</a>
     </p>
   </td></tr>
 </table>
-<!-- End [${ev.title}] -->`;
+<!-- End [${safeTitle}] -->`;
 }
 
 function buildCombinedSnippet(raw){
   if(!events.length) return '<!-- No events added yet -->';
-  const lk = getColor('cLk'), lb = getLabel(), {td, a} = btnCSS();
-  let rows = events.map(ev => {
-    const urls = buildUrls(ev);
-    const g  = raw ? urls.google  : amp(urls.google);
-    const o  = raw ? urls.outlook : amp(urls.outlook);
-    const y  = raw ? urls.yahoo   : amp(urls.yahoo);
-    const dt = fmtDate(ev.start)+' '+fmtTime(ev.start);
-    return `    <!-- ${ev.title} -->
-    <tr><td style="padding-bottom:24px;">
-      <p style="font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color:#222222;margin:0 0 4px;">${ev.title}</p>
-      <p style="font-family:Arial,sans-serif;font-size:12px;color:#888888;margin:0 0 10px;">${dt}</p>
+  const {td,a} = btnCSS(), lk=getC('cLk'), lb=getLabel();
+  const rows = events.map(ev=>{
+    const urls=buildUrls(ev);
+    if(!urls) return `    <!-- Skipped "${(ev.title||'').replace(/-->/g,'')}" — invalid dates -->`;
+    const g=raw?urls.google:urls.google.replace(/&/g,'&amp;');
+    const o=raw?urls.outlook:urls.outlook.replace(/&/g,'&amp;');
+    const y=raw?urls.yahoo:urls.yahoo.replace(/&/g,'&amp;');
+    return `    <!-- ${(ev.title||'').replace(/-->/g,'')} -->
+    <tr><td style="padding-bottom:22px;">
+      <p style="font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color:#222222;margin:0 0 3px;">${ev.title||''}</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#888888;margin:0 0 10px;">${fmtDate(ev.start)} · ${fmtTime(ev.start)}</p>
       <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
         <td style="${td}">
           <!--[if mso]><a href="${g}" style="${a}"><![endif]-->
-          <a href="${g}" style="${a}" target="_blank">${lb}</a>
+          <a href="${g}" style="${a}" target="_blank" rel="noopener noreferrer">${lb}</a>
           <!--[if mso]></a><![endif]-->
         </td>
       </tr></table>
-      <p style="font-family:Arial,sans-serif;font-size:11px;color:#aaaaaa;margin:8px 0 0;">
-        <a href="${g}" style="color:${lk};" target="_blank">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank">Yahoo</a>
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#aaaaaa;margin:7px 0 0;">
+        <a href="${g}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank" rel="noopener noreferrer">Yahoo</a>
       </p>
     </td></tr>`;
   }).join('\n');
-  return `<!-- Add to Calendar — All Events -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
-${rows}
-</table>
-<!-- End Add to Calendar -->`;
+  return `<!-- Add to Calendar — All Events -->\n<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">\n${rows}\n</table>\n<!-- End Add to Calendar -->`;
 }
 
-function buildSnippetOutput(raw){
-  if(!events.length) return '<!-- No events added yet -->';
-  if(snippetMode === 'separate') return events.map(ev => buildOneSnippet(ev, raw)).join('\n\n');
-  return buildCombinedSnippet(raw);
-}
+function buildSnippetOutput(raw){ return !events.length?'<!-- No events added yet -->':snippetMode==='separate'?events.map(e=>buildOneSnippet(e,raw)).join('\n\n'):buildCombinedSnippet(raw); }
 
-// ==================== FULL EMAIL ====================
 function buildFullEmail(raw){
   if(!events.length) return '<!-- No events added yet -->';
-  const bg = getColor('cBg'), fg = getColor('cFg'), lk = getColor('cLk');
-
+  const bg=getC('cBg'), fg=getC('cFg'), lk=getC('cLk');
+  const header = events.length===1?events[0].title:`${events.length} Upcoming Events`;
   let body;
-  if(fullMode === 'combined'){
-    body = buildCombinedSnippet(raw);
+  if(fullMode==='combined'){
+    body = '      <tr><td style="padding:24px 40px;">\n      '+buildCombinedSnippet(raw).split('\n').join('\n      ')+'\n      </td></tr>';
   } else {
-    body = events.map(ev => {
-      const s = new Date(ev.start), e = new Date(ev.end);
-      const dateStr = s.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-      const timeStr = fmtTime(ev.start)+' – '+fmtTime(ev.end);
-      const snippet = buildOneSnippet(ev, raw);
-      return `      <!-- Event: ${ev.title} -->
-      <tr><td style="padding:24px 40px 0;font-family:Arial,sans-serif;font-size:14px;color:#333333;line-height:1.7;">
-        <strong>${ev.title}</strong><br/>
-        ${dateStr}<br/>${timeStr}${ev.loc ? `<br/><a href="${ev.loc}" style="color:${lk};">${ev.loc}</a>` : ''}
-        ${ev.desc ? `<br/><br/>${ev.desc}` : ''}
+    body = events.map(ev=>{
+      const urls=buildUrls(ev); if(!urls) return '';
+      const snippet=buildOneSnippet(ev,raw);
+      const locHref = safeUrl(ev.loc);
+      const locHtml = locHref ? `<br/><a href="${raw?locHref:locHref.replace(/&/g,'&amp;')}" style="color:${lk};" rel="noopener noreferrer">${ev.loc}</a>` : (ev.loc?`<br/>${ev.loc}`:'');
+      return `      <tr><td style="padding:20px 40px 0;font-family:Arial,sans-serif;font-size:14px;color:#333333;line-height:1.7;">
+        <strong>${ev.title||''}</strong><br/>
+        ${fmtDate(ev.start)} · ${fmtTime(ev.start)}–${fmtTime(ev.end)}${locHtml}
+        ${ev.desc?`<br/><br/>${ev.desc}`:''}
       </td></tr>
-      <tr><td style="padding:16px 40px;">
+      <tr><td style="padding:14px 40px;">
         ${snippet.split('\n').join('\n        ')}
       </td></tr>
       <tr><td style="padding:0 40px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #eeeeee;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>`;
     }).join('\n');
   }
-
-  const headerTitle = events.length === 1 ? events[0].title : `${events.length} Upcoming Events`;
-
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>${headerTitle}</title>
+  <title>${header}</title>
   <style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}body{margin:0;padding:0;background-color:#f4f4f4;}</style>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f4f4;">
 <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f4f4f4;">
   <tr><td align="center" style="padding:40px 16px;">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
-      <tr><td align="center" style="background-color:${bg};padding:32px 40px;">
-        <h1 style="margin:0;font-family:Arial,sans-serif;font-size:24px;font-weight:bold;color:${fg};">${headerTitle}</h1>
+      <tr><td align="center" style="background-color:${bg};padding:30px 40px;">
+        <h1 style="margin:0;font-family:Arial,sans-serif;font-size:24px;font-weight:bold;color:${fg};">${header}</h1>
       </td></tr>
 ${body}
-      <tr><td align="center" style="background-color:#f9f9f9;padding:20px 40px;border-top:1px solid #eeeeee;">
+      <tr><td align="center" style="background-color:#f9f9f9;padding:18px 40px;border-top:1px solid #eeeeee;">
         <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#aaaaaa;">
-          <!-- UNSUBSCRIBE -->&nbsp;&nbsp;|&nbsp;&nbsp;<a href="#" style="color:#aaaaaa;">View in browser</a>
+          <!-- UNSUBSCRIBE_LINK -->&nbsp;|&nbsp;<a href="#" style="color:#aaaaaa;">View in browser</a>
         </p>
       </td></tr>
     </table>
@@ -512,236 +547,415 @@ ${body}
 </html>`;
 }
 
-// ==================== RENDER ====================
-function render(){
-  updateBadge();
-
-  // preview
+/* ============================================================
+   SAFE DOM PREVIEW BUILDER
+   Uses DOM APIs (createElement / textContent) — zero innerHTML
+   for user-controlled data, preventing XSS entirely
+   ============================================================ */
+function buildPreview(){
   const mount = document.getElementById('previewMount');
-  if(!events.length){
-    mount.innerHTML = '<p style="color:#aaa;font-size:13px;padding:40px 0;">No events yet. Add one on the left.</p>';
-  } else {
-    const bg = getColor('cBg'), fg = getColor('cFg'), lk = getColor('cLk'), lb = getLabel(), sty = getStyle();
-    const r = sty==='pill'?'999px':'4px';
-    const btnBg = sty==='outline'?'transparent':bg;
-    const btnBdr = sty==='outline'?`2px solid ${bg}`:'none';
-    const btnFg = sty==='outline'?bg:fg;
+  mount.innerHTML = '';
 
-    mount.innerHTML = events.map(ev => {
-      const urls = buildUrls(ev);
-      return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #eee;">
-        <p style="font-size:13px;font-weight:bold;color:#222;margin:0 0 2px;font-family:Arial,sans-serif;">${ev.title}</p>
-        <p style="font-size:11px;color:#999;margin:0 0 14px;font-family:Arial,sans-serif;">${fmtDate(ev.start)} &bull; ${fmtTime(ev.start)}</p>
-        <a href="${urls.google}" target="_blank" style="background:${btnBg};border:${btnBdr};color:${btnFg};font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block;padding:12px 26px;border-radius:${r};">${lb}</a>
-        <p style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin:8px 0 0;">
-          Add to: <a href="${urls.google}" style="color:${lk}" target="_blank">Google</a> | <a href="${urls.outlook}" style="color:${lk}" target="_blank">Outlook.com</a> | <a href="${urls.ics}" style="color:${lk}">Apple / iCal</a> | <a href="${urls.yahoo}" style="color:${lk}" target="_blank">Yahoo</a>
-        </p>
-      </div>`;
-    }).join('');
+  if(!events.length){
+    const p = document.createElement('p');
+    p.style.cssText='color:#aaa;font-size:13px;padding:40px 0;';
+    p.textContent='No events yet. Add one on the left.';
+    mount.appendChild(p); return;
   }
 
-  // snippet
+  const bg=getC('cBg'), fg=getC('cFg'), lk=getC('cLk'), lb=getLabel(), sty=getStyle();
+  const r = sty==='pill'?'999px':'4px';
+  const btnBg = sty==='outline'?'transparent':bg;
+  const btnBdr = sty==='outline'?`2px solid ${bg}`:'none';
+  const btnFg = sty==='outline'?bg:fg;
+
+  events.forEach(ev=>{
+    const urls=buildUrls(ev);
+    const wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #eee;';
+
+    const title=document.createElement('p');
+    title.style.cssText='font-size:13px;font-weight:bold;color:#222;margin:0 0 2px;font-family:Arial,sans-serif;';
+    title.textContent=ev.title||'';
+
+    const meta=document.createElement('p');
+    meta.style.cssText='font-size:11px;color:#999;margin:0 0 12px;font-family:Arial,sans-serif;';
+    meta.textContent=fmtDate(ev.start)+' · '+fmtTime(ev.start);
+
+    const cta=document.createElement('a');
+    cta.style.cssText=`background:${btnBg};border:${btnBdr};color:${btnFg};font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block;padding:12px 24px;border-radius:${r};`;
+    cta.textContent=lb;
+    if(urls) cta.href=urls.google; cta.target='_blank'; cta.rel='noopener noreferrer';
+
+    const fallback=document.createElement('p');
+    fallback.style.cssText='font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin:8px 0 0;';
+    fallback.textContent='Add to: ';
+
+    if(urls){
+      [['Google',urls.google],['Outlook.com',urls.outlook],['Apple / iCal',urls.ics],['Yahoo',urls.yahoo]].forEach(([label,href],i)=>{
+        if(i>0){ const sep=document.createTextNode(' | '); fallback.appendChild(sep); }
+        const a=document.createElement('a');
+        a.textContent=label; a.href=href; a.style.color=lk; a.target='_blank'; a.rel='noopener noreferrer';
+        fallback.appendChild(a);
+      });
+    }
+
+    wrap.appendChild(title); wrap.appendChild(meta); wrap.appendChild(cta); wrap.appendChild(fallback);
+    mount.appendChild(wrap);
+  });
+}
+
+/* ============================================================
+   RENDER (orchestrator)
+   ============================================================ */
+function render(){
+  updateBadge();
+  buildPreview();
   document.getElementById('snippetOut').textContent = buildSnippetOutput(false);
-  // full
-  document.getElementById('fullOut').textContent = buildFullEmail(false);
+  document.getElementById('fullOut').textContent    = buildFullEmail(false);
 }
 
-// ==================== EVENT CRUD ====================
+/* ============================================================
+   EVENT CRUD
+   ============================================================ */
 function renderEvList(){
-  const list = document.getElementById('evList');
-  if(!events.length){ list.innerHTML = '<div class="ev-empty">No events yet</div>'; return; }
-  list.innerHTML = events.map(ev => `
-    <div class="ev-card${editingId===ev.id?' selected':''}" onclick="editEvent(${ev.id})">
-      <div class="ev-card-title">${ev.title}</div>
-      <div class="ev-card-meta">${fmtDate(ev.start)} · ${fmtTime(ev.start)}</div>
-      <div class="ev-card-actions">
-        <button class="icon-btn" title="Edit" onclick="event.stopPropagation();editEvent(${ev.id})">✏️</button>
-        <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteEvent(${ev.id})">🗑</button>
-      </div>
-    </div>`).join('');
+  const list=document.getElementById('evList');
+  list.innerHTML='';
+  if(!events.length){
+    const d=document.createElement('div'); d.className='ev-empty';
+    d.textContent='No events yet'; list.appendChild(d); return;
+  }
+  events.forEach(ev=>{
+    const card=document.createElement('div');
+    card.className='ev-card'+(editingId===ev.id?' selected':'');
+    card.setAttribute('role','listitem');
+
+    const titleEl=document.createElement('div'); titleEl.className='ev-card-title'; titleEl.textContent=ev.title||'Untitled';
+    const metaEl=document.createElement('div');  metaEl.className='ev-card-meta';  metaEl.textContent=fmtDate(ev.start)+' · '+fmtTime(ev.start);
+    const actions=document.createElement('div'); actions.className='ev-card-actions';
+
+    const editBtn=document.createElement('button'); editBtn.className='icon-btn'; editBtn.textContent='✏️'; editBtn.title='Edit';
+    const delBtn =document.createElement('button'); delBtn.className='icon-btn';  delBtn.textContent='🗑';  delBtn.title='Delete';
+
+    editBtn.addEventListener('click',e=>{ e.stopPropagation(); openEditForm(ev.id); });
+    delBtn.addEventListener('click', e=>{ e.stopPropagation(); deleteEvent(ev.id); });
+    card.addEventListener('click', ()=>openEditForm(ev.id));
+
+    actions.appendChild(editBtn); actions.appendChild(delBtn);
+    card.appendChild(titleEl); card.appendChild(metaEl); card.appendChild(actions);
+    list.appendChild(card);
+  });
 }
 
-function addEvent(){
-  editingId = null;
-  document.getElementById('formTitle').textContent = 'New Event';
-  document.getElementById('fTitle').value = '';
-  document.getElementById('fLoc').value = '';
-  document.getElementById('fDesc').value = '';
-  const now = new Date(); now.setMinutes(0,0,0);
-  const end = new Date(now.getTime()+3600000);
-  document.getElementById('fStart').value = now.toISOString().slice(0,16);
-  document.getElementById('fEnd').value   = end.toISOString().slice(0,16);
-  document.getElementById('evForm').style.display = 'block';
+function openAddForm(){
+  editingId=null;
+  document.getElementById('formHeading').textContent='New Event';
+  document.getElementById('fTitle').value='';
+  document.getElementById('fLoc').value='';
+  document.getElementById('fDesc').value='';
+  const now=new Date(); now.setMinutes(0,0,0);
+  const end=new Date(now.getTime()+3600000);
+  document.getElementById('fStart').value=now.toISOString().slice(0,16);
+  document.getElementById('fEnd').value  =end.toISOString().slice(0,16);
+  hideFormError();
+  document.getElementById('evForm').style.display='block';
+  document.getElementById('fTitle').focus();
 }
 
-function editEvent(id){
-  const ev = events.find(e=>e.id===id);
-  if(!ev) return;
-  editingId = id;
-  document.getElementById('formTitle').textContent = 'Edit Event';
-  document.getElementById('fTitle').value = ev.title;
-  document.getElementById('fLoc').value   = ev.loc;
-  document.getElementById('fDesc').value  = ev.desc;
-  document.getElementById('fStart').value = ev.start;
-  document.getElementById('fEnd').value   = ev.end;
-  document.getElementById('evForm').style.display = 'block';
+function openEditForm(id){
+  const ev=events.find(e=>e.id===id); if(!ev) return;
+  editingId=id;
+  document.getElementById('formHeading').textContent='Edit Event';
+  document.getElementById('fTitle').value=ev.title;
+  document.getElementById('fLoc').value  =ev.loc;
+  document.getElementById('fDesc').value =ev.desc;
+  document.getElementById('fStart').value=ev.start;
+  document.getElementById('fEnd').value  =ev.end;
+  hideFormError();
+  document.getElementById('evForm').style.display='block';
   renderEvList();
 }
 
 function saveEvent(){
-  const title = document.getElementById('fTitle').value.trim();
-  if(!title){ alert('Please enter a title.'); return; }
-  const obj = {
-    id: editingId || nextId++,
+  const rawTitle=document.getElementById('fTitle').value;
+  const title=sanitizeText(rawTitle,200);
+  if(!title.trim()){ showFormError('Title is required.'); return; }
+
+  const start=document.getElementById('fStart').value;
+  const end  =document.getElementById('fEnd').value;
+  if(!start){ showFormError('Start date/time is required.'); return; }
+  if(end && new Date(end)<new Date(start)){ showFormError('End time must be after start time.'); return; }
+
+  const obj={
+    id:   editingId||nextId++,
     title,
-    loc:   document.getElementById('fLoc').value.trim(),
-    start: document.getElementById('fStart').value,
-    end:   document.getElementById('fEnd').value,
-    desc:  document.getElementById('fDesc').value.trim(),
+    loc:  sanitizeText(document.getElementById('fLoc').value,500),
+    start,
+    end:  end||start,
+    desc: sanitizeText(document.getElementById('fDesc').value,1000),
   };
-  if(editingId){ const i = events.findIndex(e=>e.id===editingId); events[i]=obj; }
+  if(editingId){ const i=events.findIndex(e=>e.id===editingId); events[i]=obj; }
   else events.push(obj);
-  editingId = null;
-  document.getElementById('evForm').style.display = 'none';
+  editingId=null;
+  document.getElementById('evForm').style.display='none';
+  hideFormError();
   renderEvList(); render();
 }
 
 function cancelEdit(){
-  editingId = null;
-  document.getElementById('evForm').style.display = 'none';
-  renderEvList();
+  editingId=null;
+  document.getElementById('evForm').style.display='none';
+  hideFormError(); renderEvList();
 }
 
 function deleteEvent(id){
-  events = events.filter(e=>e.id!==id);
+  events=events.filter(e=>e.id!==id);
   if(editingId===id){ editingId=null; document.getElementById('evForm').style.display='none'; }
   renderEvList(); render();
 }
 
-// ==================== ICS IMPORT ====================
-function parseIcs(text){
-  const evs = [];
-  const blocks = text.split('BEGIN:VEVENT');
-  for(let i=1;i<blocks.length;i++){
-    const b = blocks[i];
-    const get = key => {
-      const m = b.match(new RegExp(key+'(?:;[^:]+)?:([^\\r\\n]+)'));
-      return m ? m[1].trim().replace(/\\n/g,'\n').replace(/\\,/g,',') : '';
-    };
-    const parseIcsDate = s => {
-      if(!s) return '';
-      const clean = s.replace('Z','');
-      const yr=clean.slice(0,4),mo=clean.slice(4,6),dy=clean.slice(6,8);
-      const hr=clean.slice(9,11)||'00',mn=clean.slice(11,13)||'00';
-      return `${yr}-${mo}-${dy}T${hr}:${mn}`;
-    };
-    const title = get('SUMMARY') || 'Imported Event';
-    const start = parseIcsDate(get('DTSTART'));
-    const end   = parseIcsDate(get('DTEND')) || start;
-    const loc   = get('LOCATION');
-    const desc  = get('DESCRIPTION');
-    if(title && start) evs.push({ title, start, end, loc, desc });
-  }
-  return evs;
+function showFormError(msg){
+  const el=document.getElementById('formError');
+  el.textContent=msg; el.style.display='block';
 }
+function hideFormError(){ const el=document.getElementById('formError'); el.style.display='none'; el.textContent=''; }
 
+/* ============================================================
+   ICS IMPORT — secure parser
+   ============================================================ */
 function handleIcsFile(file){
   if(!file) return;
-  const r = new FileReader();
-  r.onload = e => {
-    const parsed = parseIcs(e.target.result);
-    const container = document.getElementById('importResults');
-    if(!parsed.length){ container.innerHTML = '<p style="font-size:12px;color:var(--red);">No events found in file.</p>'; return; }
-    container.innerHTML = `<p style="font-size:11px;color:var(--t3);margin-bottom:8px;">Found ${parsed.length} event${parsed.length>1?'s':''} — click to add:</p>`
-      + parsed.map((ev,i) => `
-        <div class="imp-row">
-          <div class="imp-row-info">
-            <div class="imp-row-title">${ev.title}</div>
-            <div class="imp-row-meta">${ev.start ? fmtDate(ev.start) : 'No date'}</div>
-          </div>
-          <div class="imp-row-actions">
-            <button class="btn btn-acc btn-sm" onclick="importEvent(${i})">Add</button>
-          </div>
-        </div>`).join('');
-    window._importBuffer = parsed;
+  const container=document.getElementById('importResults');
+  container.innerHTML='';
+
+  // 1. File type check
+  if(file.name && !/\.(ics|ical)$/i.test(file.name)){
+    showImportError(container,'Only .ics / .ical files are accepted.'); return;
+  }
+  // 2. Size check
+  if(file.size>MAX_FILE_BYTES){
+    showImportError(container,`File too large (max 2MB). This file is ${(file.size/1024/1024).toFixed(1)}MB.`); return;
+  }
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const text=e.target.result;
+      // 3. Reject if it doesn't look like a VCALENDAR
+      if(!/BEGIN:VCALENDAR/i.test(text)){
+        showImportError(container,'File does not appear to be a valid iCalendar (.ics) file.'); return;
+      }
+      const parsed=parseIcs(text);
+      if(!parsed.length){ showImportError(container,'No valid events found in this file.'); return; }
+
+      // success — build import list using DOM (no innerHTML with user data)
+      const intro=document.createElement('p');
+      intro.style.cssText='font-size:11px;color:var(--t3);margin-bottom:8px;';
+      intro.textContent=`Found ${parsed.length} event${parsed.length>1?'s':''} — click Add to include:`;
+      container.appendChild(intro);
+
+      parsed.forEach((ev,i)=>{
+        const row=document.createElement('div'); row.className='imp-row';
+        const info=document.createElement('div'); info.style.cssText='flex:1;min-width:0;';
+        const t=document.createElement('div'); t.className='imp-title'; t.textContent=ev.title||'Untitled';
+        const m=document.createElement('div'); m.className='imp-meta';  m.textContent=ev.start?fmtDate(ev.start):'No date';
+        const addBtn=document.createElement('button'); addBtn.className='btn btn-acc btn-sm'; addBtn.textContent='Add';
+        addBtn.addEventListener('click',()=>importEvent(i, addBtn));
+        info.appendChild(t); info.appendChild(m);
+        row.appendChild(info); row.appendChild(addBtn);
+        container.appendChild(row);
+      });
+      _importBuf=parsed;
+    }catch(err){
+      showImportError(container,'Could not parse this file. Please check it is a valid .ics file.');
+    }
   };
-  r.readAsText(file);
+  reader.onerror=()=>showImportError(container,'Could not read the file.');
+  reader.readAsText(file,'UTF-8');
 }
 
-function importEvent(i){
-  const ev = window._importBuffer?.[i];
-  if(!ev) return;
-  events.push({ id: nextId++, ...ev });
-  switchLeft('events', document.querySelector('.lt'));
-  // activate events tab
-  document.querySelectorAll('.lt').forEach((t,idx)=>{ t.classList.toggle('active', idx===0); });
-  document.querySelectorAll('.lp').forEach((p,idx)=>{ p.classList.toggle('active', idx===0); });
+function showImportError(container, msg){
+  const d=document.createElement('div'); d.className='err-box';
+  d.textContent=msg; container.appendChild(d);
+}
+
+function parseIcs(raw){
+  const results=[];
+  // Unfold long lines (RFC 5545 §3.1)
+  const text=raw.replace(/\r\n[ \t]/g,'').replace(/\n[ \t]/g,'');
+  const blocks=text.split(/BEGIN:VEVENT/i);
+
+  for(let i=1;i<blocks.length && results.length<MAX_EVENTS;i++){
+    const b=blocks[i];
+
+    const get=key=>{
+      // match PROPERTY or PROPERTY;params
+      const m=b.match(new RegExp('(?:^|\\n)'+key+'(?:;[^:]+)?:([^\\r\\n]*)','im'));
+      if(!m) return '';
+      return m[1].trim()
+        .replace(/\\n/g,'\n').replace(/\\,/g,',').replace(/\\;/g,';').replace(/\\\\/g,'\\')
+        .slice(0,MAX_FIELD_LEN);
+    };
+
+    const parseDt=s=>{
+      if(!s) return '';
+      const c=s.replace(/Z$/,'').replace(/[^0-9T]/g,'');
+      const yr=c.slice(0,4),mo=c.slice(4,6),dy=c.slice(6,8);
+      const hr=c.slice(9,11)||'00',mn=c.slice(11,13)||'00';
+      if(!yr||!mo||!dy) return '';
+      return `${yr}-${mo}-${dy}T${hr}:${mn}`;
+    };
+
+    const title = sanitizeText(get('SUMMARY')||'Imported Event',200);
+    const start = parseDt(get('DTSTART'));
+    const end   = parseDt(get('DTEND'))||start;
+    const loc   = sanitizeText(safeUrl(get('LOCATION'))||sanitizeText(get('LOCATION'),200),200);
+    const desc  = sanitizeText(get('DESCRIPTION'),1000);
+
+    if(start) results.push({title,start,end,loc,desc});
+  }
+  return results;
+}
+
+function importEvent(i, btn){
+  const ev=_importBuf[i]; if(!ev) return;
+  events.push({id:nextId++,...ev});
+  // visually confirm
+  btn.textContent='✓ Added'; btn.disabled=true; btn.style.opacity='0.6';
+  // switch to Events tab
+  activateLeftTab('events');
   renderEvList(); render();
 }
 
-// ==================== UI HELPERS ====================
-function switchLeft(name, el){
-  document.querySelectorAll('.lt').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.lp').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('lp-'+name).classList.add('active');
+/* ============================================================
+   UI — TABS / TOGGLE / COPY
+   ============================================================ */
+function activateLeftTab(name){
+  ['events','style','import'].forEach(n=>{
+    document.getElementById('lt'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',n===name);
+    document.getElementById('lp-'+n).classList.toggle('active',n===name);
+  });
 }
 
-function switchRight(name, el){
-  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.rpanel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('rp-'+name).classList.add('active');
+function activateRightTab(name){
+  ['Preview','Snippet','Full'].forEach(n=>{
+    document.getElementById('rt'+n).classList.toggle('active',n.toLowerCase()===name);
+    document.getElementById('rp-'+n.toLowerCase()).classList.toggle('active',n.toLowerCase()===name);
+  });
 }
 
-function pickStyle(el){
-  document.querySelectorAll('.so').forEach(e=>e.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
-function syncC(textId, pickId){
-  document.getElementById(textId).value = document.getElementById(pickId).value;
-  render();
-}
-
-function pickMode(which, el){
-  const parent = document.getElementById(which+'ModeToggle');
+function pickMode(which,btn){
+  const parent=document.getElementById(which+'ModeToggle');
   parent.querySelectorAll('.mt').forEach(m=>m.classList.remove('active'));
-  el.classList.add('active');
-  if(which==='snippet') snippetMode = el.dataset.mode;
-  else fullMode = el.dataset.mode;
+  btn.classList.add('active');
+  if(which==='snippet') snippetMode=btn.dataset.mode;
+  else fullMode=btn.dataset.mode;
   render();
 }
 
 function copyOut(which){
-  const text = which==='snippet' ? buildSnippetOutput(true) : buildFullEmail(true);
-  const btnId = which==='snippet' ? 'copySnippetBtn' : 'copyFullBtn';
+  const text=which==='snippet'?buildSnippetOutput(true):buildFullEmail(true);
+  const btnId=which==='snippet'?'copySnippetBtn':'copyFullBtn';
   navigator.clipboard.writeText(text).then(()=>{
-    const btn = document.getElementById(btnId);
-    const orig = btn.innerHTML;
+    const btn=document.getElementById(btnId);
+    const orig=btn.innerHTML;
     btn.classList.add('copied');
-    btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
-    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML = orig; }, 2500);
+    btn.innerHTML='<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML=orig; },2500);
+  }).catch(()=>{
+    // fallback for older browsers
+    const ta=document.createElement('textarea'); ta.value=text;
+    ta.style.cssText='position:fixed;opacity:0;'; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand('copy'); }catch(_){}
+    document.body.removeChild(ta);
   });
 }
 
-function dzDrag(e, on){ e.preventDefault(); document.getElementById('dropZone').classList.toggle('drag', on); }
-function dzDrop(e){ e.preventDefault(); dzDrag(e, false); const f=e.dataTransfer.files[0]; if(f) handleIcsFile(f); }
-
 function updateBadge(){
-  const b = document.getElementById('evCountBadge');
-  b.textContent = `${events.length} event${events.length!==1?'s':''}`;
+  const b=document.getElementById('evCountBadge');
+  b.textContent=`${events.length} event${events.length!==1?'s':''}`;
 }
 
-// ---- wire color/label inputs ----
-['cBg','cFg','cLk'].forEach(id=>{
-  document.getElementById(id).addEventListener('input',()=>{ document.getElementById(id+'P').value=document.getElementById(id).value; render(); });
-});
+/* ============================================================
+   MOBILE DRAWER
+   ============================================================ */
+function toggleDrawer(){
+  const panel=document.getElementById('leftPanel');
+  const overlay=document.getElementById('overlay');
+  const open=panel.classList.toggle('open');
+  overlay.classList.toggle('show',open);
+}
 
-// INIT
-renderEvList();
-render();
+/* ============================================================
+   WIRE UP ALL EVENTS (no inline handlers in HTML)
+   ============================================================ */
+document.addEventListener('DOMContentLoaded',()=>{
+
+  // Header hamburger
+  document.getElementById('hamburgerBtn').addEventListener('click',toggleDrawer);
+  document.getElementById('overlay').addEventListener('click',toggleDrawer);
+
+  // Left tabs
+  document.getElementById('ltEvents').addEventListener('click',()=>activateLeftTab('events'));
+  document.getElementById('ltStyle') .addEventListener('click',()=>activateLeftTab('style'));
+  document.getElementById('ltImport').addEventListener('click',()=>activateLeftTab('import'));
+
+  // Right tabs
+  document.getElementById('rtPreview').addEventListener('click',()=>activateRightTab('preview'));
+  document.getElementById('rtSnippet').addEventListener('click',()=>activateRightTab('snippet'));
+  document.getElementById('rtFull')   .addEventListener('click',()=>activateRightTab('full'));
+
+  // Event form
+  document.getElementById('addEventBtn') .addEventListener('click',openAddForm);
+  document.getElementById('saveEventBtn').addEventListener('click',saveEvent);
+  document.getElementById('cancelEditBtn').addEventListener('click',cancelEdit);
+
+  // Style buttons
+  document.querySelectorAll('.so').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.so').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active'); render();
+    });
+  });
+
+  // Color pickers ↔ text inputs
+  [['cBgP','cBg'],['cFgP','cFg'],['cLkP','cLk']].forEach(([pickId,textId])=>{
+    document.getElementById(pickId).addEventListener('input',()=>{
+      document.getElementById(textId).value=document.getElementById(pickId).value; render();
+    });
+    document.getElementById(textId).addEventListener('input',()=>{
+      const v=document.getElementById(textId).value;
+      if(/^#[0-9A-Fa-f]{6}$/.test(v)) document.getElementById(pickId).value=v;
+      render();
+    });
+  });
+
+  // Button label
+  document.getElementById('btnLabel').addEventListener('input',render);
+
+  // Mode toggles
+  document.querySelectorAll('#snippetModeToggle .mt').forEach(btn=>btn.addEventListener('click',()=>pickMode('snippet',btn)));
+  document.querySelectorAll('#fullModeToggle .mt')   .forEach(btn=>btn.addEventListener('click',()=>pickMode('full',btn)));
+
+  // Copy buttons
+  document.getElementById('copySnippetBtn').addEventListener('click',()=>copyOut('snippet'));
+  document.getElementById('copyFullBtn')   .addEventListener('click',()=>copyOut('full'));
+
+  // ICS file input
+  document.getElementById('icsFileInput').addEventListener('change',e=>handleIcsFile(e.target.files[0]));
+
+  // Drop zone
+  const dz=document.getElementById('dropZone');
+  dz.addEventListener('click',()=>document.getElementById('icsFileInput').click());
+  dz.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') document.getElementById('icsFileInput').click(); });
+  dz.addEventListener('dragover',e=>{ e.preventDefault(); dz.classList.add('drag'); });
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+  dz.addEventListener('drop',e=>{ e.preventDefault(); dz.classList.remove('drag'); handleIcsFile(e.dataTransfer.files[0]); });
+
+  // Initial render
+  renderEvList();
+  render();
+});
 </script>
 </body>
 </html>
