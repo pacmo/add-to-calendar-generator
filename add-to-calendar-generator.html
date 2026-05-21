@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Add to Calendar — Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0d;
+  --s1:#111116;
+  --s2:#18181f;
+  --s3:#21212b;
+  --b1:#2c2c3a;
+  --b2:#3d3d50;
+  --acc:#e8ff47;
+  --acc2:#c8e000;
+  --acc-dim:rgba(232,255,71,0.12);
+  --red:#ff5f5f;
+  --grn:#4ade80;
+  --blue:#60a5fa;
+  --txt:#f2f1fa;
+  --t2:#9998b3;
+  --t3:#5f5e78;
+  --mono:'Fira Code',monospace;
+  --head:'Syne',sans-serif;
+  --body:'DM Sans',sans-serif;
+  --r:8px;
+}
+body{background:var(--bg);color:var(--txt);font-family:var(--body);min-height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* HEADER */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;border-bottom:1px solid var(--b1);
+  background:var(--s1);flex-shrink:0;
+}
+.hd-left{display:flex;align-items:center;gap:12px;}
+.logo{width:32px;height:32px;background:var(--acc);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.site-title{font-family:var(--head);font-size:16px;font-weight:700;letter-spacing:-0.3px;}
+.site-title span{color:var(--acc);}
+.hd-right{display:flex;gap:8px;align-items:center;}
+
+/* PILL BADGE */
+.badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;letter-spacing:0.3px;}
+.badge-acc{background:var(--acc-dim);color:var(--acc);border:1px solid rgba(232,255,71,0.3);}
+.badge-gray{background:var(--s3);color:var(--t2);border:1px solid var(--b1);}
+
+/* LAYOUT */
+.app{flex:1;display:grid;grid-template-columns:380px 1fr;overflow:hidden;}
+
+/* =================== LEFT PANEL =================== */
+.left{border-right:1px solid var(--b1);display:flex;flex-direction:column;overflow:hidden;background:var(--s1);}
+
+.left-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.lt{flex:1;padding:12px 0;text-align:center;font-size:12px;font-weight:600;font-family:var(--head);letter-spacing:0.5px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.lt:hover{color:var(--t2);}
+.lt.active{color:var(--acc);border-bottom-color:var(--acc);}
+
+.left-body{flex:1;overflow-y:auto;padding:20px;}
+.left-body::-webkit-scrollbar{width:4px;}
+.left-body::-webkit-scrollbar-track{background:transparent;}
+.left-body::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+
+.lp{display:none;}
+.lp.active{display:block;}
+
+/* SECTION */
+.sec{margin-bottom:22px;}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--t3);margin-bottom:10px;}
+
+/* FIELDS */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+input[type=text],input[type=datetime-local],textarea,select{
+  width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);
+  color:var(--txt);font-family:var(--body);font-size:13px;padding:9px 12px;outline:none;transition:border .15s;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);}
+textarea{resize:vertical;min-height:72px;line-height:1.55;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+.color-row{display:flex;gap:8px;align-items:center;}
+input[type=color]{width:40px;height:36px;padding:2px 3px;border-radius:6px;cursor:pointer;background:var(--s2);border:1px solid var(--b1);}
+.color-row input[type=text]{flex:1;font-family:var(--mono);font-size:12px;}
+
+/* STYLE PICKER */
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.so{border:1px solid var(--b1);border-radius:var(--r);padding:10px 6px;text-align:center;font-size:11px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s;font-family:var(--head);}
+.so:hover{border-color:var(--b2);color:var(--txt);}
+.so.active{border-color:var(--acc);background:var(--acc-dim);color:var(--acc);}
+.so .pb{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;margin-bottom:5px;pointer-events:none;font-family:var(--body);}
+.so.sf .pb{background:#e8ff47;color:#000;border-radius:3px;}
+.so.so2 .pb{border:1.5px solid #e8ff47;color:#e8ff47;border-radius:3px;}
+.so.sp .pb{background:#e8ff47;color:#000;border-radius:20px;}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:var(--r);font-family:var(--head);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:0.2px;}
+.btn-acc{background:var(--acc);color:#000;}
+.btn-acc:hover{background:var(--acc2);}
+.btn-ghost{background:var(--s3);color:var(--txt);border:1px solid var(--b1);}
+.btn-ghost:hover{border-color:var(--b2);}
+.btn-red{background:rgba(255,95,95,0.12);color:var(--red);border:1px solid rgba(255,95,95,0.25);}
+.btn-red:hover{background:rgba(255,95,95,0.2);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn-full{width:100%;justify-content:center;}
+
+/* EVENT LIST */
+.ev-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.ev-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s;position:relative;}
+.ev-card:hover{border-color:var(--b2);}
+.ev-card.selected{border-color:var(--acc);background:var(--acc-dim);}
+.ev-card-title{font-family:var(--head);font-size:13px;font-weight:600;margin-bottom:3px;padding-right:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ev-card-meta{font-size:11px;color:var(--t2);}
+.ev-card-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;}
+.icon-btn{background:none;border:none;color:var(--t3);cursor:pointer;padding:3px;border-radius:4px;transition:all .15s;font-size:13px;line-height:1;}
+.icon-btn:hover{color:var(--txt);background:var(--s3);}
+.ev-empty{text-align:center;padding:28px 0;color:var(--t3);font-size:13px;}
+
+/* ICS DROP ZONE */
+.drop-zone{
+  border:2px dashed var(--b2);border-radius:var(--r);padding:28px;text-align:center;
+  cursor:pointer;transition:all .2s;background:var(--s2);
+}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--acc);background:var(--acc-dim);}
+.drop-zone svg{margin-bottom:10px;opacity:.5;}
+.drop-zone p{font-size:13px;color:var(--t2);line-height:1.6;}
+.drop-zone span{font-size:11px;color:var(--t3);}
+#icsFileInput{display:none;}
+.import-results{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
+.imp-row{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.imp-row-info{flex:1;min-width:0;}
+.imp-row-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.imp-row-meta{font-size:10px;color:var(--t3);margin-top:2px;}
+.imp-row-actions{display:flex;gap:4px;flex-shrink:0;}
+
+/* =================== RIGHT PANEL =================== */
+.right{display:flex;flex-direction:column;overflow:hidden;}
+
+.right-tabs{display:flex;border-bottom:1px solid var(--b1);padding:0 28px;flex-shrink:0;background:var(--s1);}
+.rt{padding:14px 16px;font-size:12px;font-weight:600;font-family:var(--head);letter-spacing:0.4px;text-transform:uppercase;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.rt:hover{color:var(--t2);}
+.rt.active{color:var(--acc);border-bottom-color:var(--acc);}
+
+.rpanel{display:none;flex:1;flex-direction:column;overflow:hidden;padding:24px 28px;}
+.rpanel.active{display:flex;}
+
+/* PREVIEW */
+.preview-bg{flex:1;background:#fff;border-radius:var(--r);overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;}
+#previewMount{text-align:center;font-family:Arial,sans-serif;max-width:520px;width:100%;}
+
+/* CODE */
+.code-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-shrink:0;}
+.code-file{font-family:var(--mono);font-size:11px;color:var(--t3);}
+.code-out{
+  flex:1;overflow:auto;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);
+  padding:18px 20px;font-family:var(--mono);font-size:12px;line-height:1.75;color:#b0aecf;
+  white-space:pre;
+}
+.code-out::-webkit-scrollbar{width:4px;height:4px;}
+.code-out::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+
+/* OUTPUT MODE TOGGLE */
+.mode-toggle{display:flex;gap:0;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:3px;margin-bottom:16px;flex-shrink:0;}
+.mt{flex:1;text-align:center;padding:6px 10px;font-size:11px;font-weight:600;font-family:var(--head);letter-spacing:0.3px;color:var(--t2);cursor:pointer;border-radius:6px;transition:all .15s;}
+.mt.active{background:var(--acc);color:#000;}
+
+/* COPY BTN state */
+.copied{background:rgba(74,222,128,0.15)!important;color:var(--grn)!important;border-color:rgba(74,222,128,0.3)!important;}
+
+/* SCROLLBAR GLOBAL */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--b2);}
+
+/* DIVIDER */
+hr.div{border:none;border-top:1px solid var(--b1);margin:16px 0;}
+
+/* TAG */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:20px;font-family:var(--head);font-weight:600;letter-spacing:.4px;}
+.tag-green{background:rgba(74,222,128,.1);color:var(--grn);border:1px solid rgba(74,222,128,.2);}
+.tag-blue{background:rgba(96,165,250,.1);color:var(--blue);border:1px solid rgba(96,165,250,.2);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-left">
+    <div class="logo">📅</div>
+    <span class="site-title">CalGen<span>.</span></span>
+  </div>
+  <div class="hd-right">
+    <span class="badge badge-gray" id="evCountBadge">0 events</span>
+    <span class="badge badge-acc">Eloqua-safe</span>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- ===== LEFT ===== -->
+  <div class="left">
+    <div class="left-tabs">
+      <div class="lt active" onclick="switchLeft('events',this)">Events</div>
+      <div class="lt" onclick="switchLeft('style',this)">Style</div>
+      <div class="lt" onclick="switchLeft('import',this)">Import .ics</div>
+    </div>
+
+    <!-- EVENTS TAB -->
+    <div class="left-body lp active" id="lp-events">
+
+      <div class="sec">
+        <div class="sec-label">Event list</div>
+        <div class="ev-list" id="evList"></div>
+        <button class="btn btn-acc btn-full" onclick="addEvent()">+ Add Event</button>
+      </div>
+
+      <hr class="div"/>
+
+      <!-- EDIT FORM -->
+      <div id="evForm" style="display:none;">
+        <div class="sec-label" id="formTitle">Edit Event</div>
+        <div class="field"><label>Title</label><input type="text" id="fTitle" placeholder="My Event"/></div>
+        <div class="field"><label>Location / URL</label><input type="text" id="fLoc" placeholder="https://..."/></div>
+        <div class="row2">
+          <div class="field"><label>Start</label><input type="datetime-local" id="fStart"/></div>
+          <div class="field"><label>End</label><input type="datetime-local" id="fEnd"/></div>
+        </div>
+        <div class="field"><label>Description</label><textarea id="fDesc" placeholder="Optional"></textarea></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-acc" style="flex:1;" onclick="saveEvent()">Save Event</button>
+          <button class="btn btn-ghost" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STYLE TAB -->
+    <div class="left-body lp" id="lp-style">
+
+      <div class="sec">
+        <div class="sec-label">Button style</div>
+        <div class="style-grid">
+          <div class="so sf active" data-s="filled" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Filled</div>
+          <div class="so so2" data-s="outline" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Outline</div>
+          <div class="so sp" data-s="pill" onclick="pickStyle(this)"><div><span class="pb">+ Add</span></div>Pill</div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-label">Colors</div>
+        <div class="field"><label>Button background</label>
+          <div class="color-row">
+            <input type="color" id="cBgP" value="#0055CC" oninput="syncC('cBg','cBgP')"/>
+            <input type="text" id="cBg" value="#0055CC" maxlength="7" oninput="syncC('cBgP','cBg')"/>
+          </div>
+        </div>
+        <div class="field"><label>Button text</label>
+          <div class="color-row">
+            <input type="color" id="cFgP" value="#ffffff" oninput="syncC('cFg','cFgP')"/>
+            <input type="text" id="cFg" value="#ffffff" maxlength="7" oninput="syncC('cFgP','cFg')"/>
+          </div>
+        </div>
+        <div class="field"><label>Link color</label>
+          <div class="color-row">
+            <input type="color" id="cLkP" value="#0055CC" oninput="syncC('cLk','cLkP')"/>
+            <input type="text" id="cLk" value="#0055CC" maxlength="7" oninput="syncC('cLkP','cLk')"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-label">Button label</div>
+        <div class="field"><input type="text" id="btnLabel" value="📅 Add to Calendar" oninput="render()"/></div>
+      </div>
+
+    </div>
+
+    <!-- IMPORT TAB -->
+    <div class="left-body lp" id="lp-import">
+      <div class="sec">
+        <div class="sec-label">Import .ics file</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('icsFileInput').click()" ondragover="dzDrag(event,true)" ondragleave="dzDrag(event,false)" ondrop="dzDrop(event)">
+          <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 0L8 8m4-4l4 4"/></svg>
+          <p>Drop a .ics file here<br/>or click to browse</p>
+          <span>Supports single and multi-event files</span>
+        </div>
+        <input type="file" id="icsFileInput" accept=".ics,.ical,text/calendar" onchange="handleIcsFile(this.files[0])"/>
+      </div>
+      <div id="importResults" class="import-results"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== RIGHT ===== -->
+  <div class="right">
+    <div class="right-tabs">
+      <div class="rt active" onclick="switchRight('preview',this)">Preview</div>
+      <div class="rt" onclick="switchRight('snippet',this)">Snippet</div>
+      <div class="rt" onclick="switchRight('full',this)">Full Email</div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="rpanel active" id="rp-preview">
+      <p style="font-size:12px;color:var(--t3);margin-bottom:16px;flex-shrink:0;">White background — as it appears in email clients</p>
+      <div class="preview-bg"><div id="previewMount"></div></div>
+    </div>
+
+    <!-- SNIPPET -->
+    <div class="rpanel" id="rp-snippet">
+      <div class="mode-toggle" id="snippetModeToggle">
+        <div class="mt active" data-mode="separate" onclick="pickMode('snippet',this)">One per event</div>
+        <div class="mt" data-mode="combined" onclick="pickMode('snippet',this)">Combined block</div>
+      </div>
+      <div class="code-toolbar">
+        <span class="code-file">snippet.html</span>
+        <button class="btn btn-ghost btn-sm" id="copySnippetBtn" onclick="copyOut('snippet')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <div class="code-out" id="snippetOut"></div>
+    </div>
+
+    <!-- FULL EMAIL -->
+    <div class="rpanel" id="rp-full">
+      <div class="mode-toggle" id="fullModeToggle">
+        <div class="mt active" data-mode="separate" onclick="pickMode('full',this)">One per event</div>
+        <div class="mt" data-mode="combined" onclick="pickMode('full',this)">Combined block</div>
+      </div>
+      <div class="code-toolbar">
+        <span class="code-file">email-template.html</span>
+        <button class="btn btn-ghost btn-sm" id="copyFullBtn" onclick="copyOut('full')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+      </div>
+      <div class="code-out" id="fullOut"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ==================== STATE ====================
+let events = [
+  { id:1, title:'Q3 Product Webinar', loc:'https://zoom.us/j/12345', start:'2026-06-15T14:00', end:'2026-06-15T15:00', desc:'Join us for an overview of the latest product updates and a live Q&A.' }
+];
+let nextId = 2;
+let editingId = null;
+let snippetMode = 'separate';
+let fullMode = 'separate';
+
+// ==================== HELPERS ====================
+const pad = n => String(n).padStart(2,'0');
+function toUtc(d){ return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z'; }
+function fmtDate(s){
+  const d = new Date(s);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function fmtTime(s){
+  const d = new Date(s);
+  return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function getStyle(){ return document.querySelector('.so.active')?.dataset.s || 'filled'; }
+function getColor(id){ return document.getElementById(id)?.value || '#0055CC'; }
+function getLabel(){ return document.getElementById('btnLabel')?.value || 'Add to Calendar'; }
+
+function buildUrls(ev){
+  const s = new Date(ev.start), e = new Date(ev.end);
+  const se = toUtc(s)+'/'+toUtc(e);
+  const google  = 'https://www.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.title)+'&dates='+se+'&location='+encodeURIComponent(ev.loc||'')+'&details='+encodeURIComponent(ev.desc||'');
+  const outlook = 'https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&subject='+encodeURIComponent(ev.title)+'&startdt='+s.toISOString()+'&enddt='+e.toISOString()+'&location='+encodeURIComponent(ev.loc||'')+'&body='+encodeURIComponent(ev.desc||'');
+  const dur = Math.round((e-s)/60000);
+  const yahoo = 'https://calendar.yahoo.com/?v=60&title='+encodeURIComponent(ev.title)+'&st='+toUtc(s)+'&dur='+String(Math.floor(dur/60)).padStart(2,'0')+String(dur%60).padStart(2,'0')+'&in_loc='+encodeURIComponent(ev.loc||'')+'&desc='+encodeURIComponent(ev.desc||'');
+  const icsData = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CalGen//EN','BEGIN:VEVENT','DTSTART:'+toUtc(s),'DTEND:'+toUtc(e),'SUMMARY:'+(ev.title||'').replace(/,/g,'\\,'),'DESCRIPTION:'+(ev.desc||'').replace(/,/g,'\\,').replace(/\n/g,'\\n'),'LOCATION:'+(ev.loc||'').replace(/,/g,'\\,'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const ics = 'data:text/calendar;charset=utf8,'+encodeURIComponent(icsData);
+  return { google, outlook, yahoo, ics };
+}
+
+function btnCSS(raw){
+  const bg = getColor('cBg'), fg = getColor('cFg'), sty = getStyle();
+  const r   = sty==='pill' ? '999px' : '4px';
+  const bgS = sty==='outline' ? 'background-color:transparent;' : `background-color:${bg};`;
+  const bdr = sty==='outline' ? `border:2px solid ${bg};` : '';
+  const fgS = sty==='outline' ? `color:${bg};` : `color:${fg};`;
+  const td  = `${bgS}${bdr}border-radius:${r};padding:13px 28px;`;
+  const a   = `${fgS}font-family:Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;display:inline-block;`;
+  return { td, a };
+}
+
+function amp(s){ return s.replace(/&/g,'&amp;'); }
+
+// ==================== SNIPPET BUILDER ====================
+function buildOneSnippet(ev, raw){
+  const urls = buildUrls(ev);
+  const {td, a} = btnCSS();
+  const lk = getColor('cLk'), lb = getLabel();
+  const g  = raw ? urls.google  : amp(urls.google);
+  const o  = raw ? urls.outlook : amp(urls.outlook);
+  const y  = raw ? urls.yahoo   : amp(urls.yahoo);
+  return `<!-- [${ev.title}] Add to Calendar -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+  <tr><td align="center">
+    <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
+      <td style="${td}">
+        <!--[if mso]><a href="${g}" style="${a}"><![endif]-->
+        <a href="${g}" style="${a}" target="_blank">${lb}</a>
+        <!--[if mso]></a><![endif]-->
+      </td>
+    </tr></table>
+    <p style="font-family:Arial,sans-serif;font-size:12px;color:#888888;margin:10px 0 0;">
+      Add to:
+      <a href="${g}" style="color:${lk};" target="_blank">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank">Yahoo</a>
+    </p>
+  </td></tr>
+</table>
+<!-- End [${ev.title}] -->`;
+}
+
+function buildCombinedSnippet(raw){
+  if(!events.length) return '<!-- No events added yet -->';
+  const lk = getColor('cLk'), lb = getLabel(), {td, a} = btnCSS();
+  let rows = events.map(ev => {
+    const urls = buildUrls(ev);
+    const g  = raw ? urls.google  : amp(urls.google);
+    const o  = raw ? urls.outlook : amp(urls.outlook);
+    const y  = raw ? urls.yahoo   : amp(urls.yahoo);
+    const dt = fmtDate(ev.start)+' '+fmtTime(ev.start);
+    return `    <!-- ${ev.title} -->
+    <tr><td style="padding-bottom:24px;">
+      <p style="font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color:#222222;margin:0 0 4px;">${ev.title}</p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:#888888;margin:0 0 10px;">${dt}</p>
+      <table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
+        <td style="${td}">
+          <!--[if mso]><a href="${g}" style="${a}"><![endif]-->
+          <a href="${g}" style="${a}" target="_blank">${lb}</a>
+          <!--[if mso]></a><![endif]-->
+        </td>
+      </tr></table>
+      <p style="font-family:Arial,sans-serif;font-size:11px;color:#aaaaaa;margin:8px 0 0;">
+        <a href="${g}" style="color:${lk};" target="_blank">Google</a>&nbsp;|&nbsp;<a href="${o}" style="color:${lk};" target="_blank">Outlook.com</a>&nbsp;|&nbsp;<a href="${urls.ics}" style="color:${lk};">Apple&nbsp;/&nbsp;iCal</a>&nbsp;|&nbsp;<a href="${y}" style="color:${lk};" target="_blank">Yahoo</a>
+      </p>
+    </td></tr>`;
+  }).join('\n');
+  return `<!-- Add to Calendar — All Events -->
+<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
+${rows}
+</table>
+<!-- End Add to Calendar -->`;
+}
+
+function buildSnippetOutput(raw){
+  if(!events.length) return '<!-- No events added yet -->';
+  if(snippetMode === 'separate') return events.map(ev => buildOneSnippet(ev, raw)).join('\n\n');
+  return buildCombinedSnippet(raw);
+}
+
+// ==================== FULL EMAIL ====================
+function buildFullEmail(raw){
+  if(!events.length) return '<!-- No events added yet -->';
+  const bg = getColor('cBg'), fg = getColor('cFg'), lk = getColor('cLk');
+
+  let body;
+  if(fullMode === 'combined'){
+    body = buildCombinedSnippet(raw);
+  } else {
+    body = events.map(ev => {
+      const s = new Date(ev.start), e = new Date(ev.end);
+      const dateStr = s.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      const timeStr = fmtTime(ev.start)+' – '+fmtTime(ev.end);
+      const snippet = buildOneSnippet(ev, raw);
+      return `      <!-- Event: ${ev.title} -->
+      <tr><td style="padding:24px 40px 0;font-family:Arial,sans-serif;font-size:14px;color:#333333;line-height:1.7;">
+        <strong>${ev.title}</strong><br/>
+        ${dateStr}<br/>${timeStr}${ev.loc ? `<br/><a href="${ev.loc}" style="color:${lk};">${ev.loc}</a>` : ''}
+        ${ev.desc ? `<br/><br/>${ev.desc}` : ''}
+      </td></tr>
+      <tr><td style="padding:16px 40px;">
+        ${snippet.split('\n').join('\n        ')}
+      </td></tr>
+      <tr><td style="padding:0 40px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="border-top:1px solid #eeeeee;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>`;
+    }).join('\n');
+  }
+
+  const headerTitle = events.length === 1 ? events[0].title : `${events.length} Upcoming Events`;
+
+  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>${headerTitle}</title>
+  <style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}body{margin:0;padding:0;background-color:#f4f4f4;}</style>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;">
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f4f4f4;">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color:#ffffff;border-radius:8px;overflow:hidden;">
+      <tr><td align="center" style="background-color:${bg};padding:32px 40px;">
+        <h1 style="margin:0;font-family:Arial,sans-serif;font-size:24px;font-weight:bold;color:${fg};">${headerTitle}</h1>
+      </td></tr>
+${body}
+      <tr><td align="center" style="background-color:#f9f9f9;padding:20px 40px;border-top:1px solid #eeeeee;">
+        <p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#aaaaaa;">
+          <!-- UNSUBSCRIBE -->&nbsp;&nbsp;|&nbsp;&nbsp;<a href="#" style="color:#aaaaaa;">View in browser</a>
+        </p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+}
+
+// ==================== RENDER ====================
+function render(){
+  updateBadge();
+
+  // preview
+  const mount = document.getElementById('previewMount');
+  if(!events.length){
+    mount.innerHTML = '<p style="color:#aaa;font-size:13px;padding:40px 0;">No events yet. Add one on the left.</p>';
+  } else {
+    const bg = getColor('cBg'), fg = getColor('cFg'), lk = getColor('cLk'), lb = getLabel(), sty = getStyle();
+    const r = sty==='pill'?'999px':'4px';
+    const btnBg = sty==='outline'?'transparent':bg;
+    const btnBdr = sty==='outline'?`2px solid ${bg}`:'none';
+    const btnFg = sty==='outline'?bg:fg;
+
+    mount.innerHTML = events.map(ev => {
+      const urls = buildUrls(ev);
+      return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #eee;">
+        <p style="font-size:13px;font-weight:bold;color:#222;margin:0 0 2px;font-family:Arial,sans-serif;">${ev.title}</p>
+        <p style="font-size:11px;color:#999;margin:0 0 14px;font-family:Arial,sans-serif;">${fmtDate(ev.start)} &bull; ${fmtTime(ev.start)}</p>
+        <a href="${urls.google}" target="_blank" style="background:${btnBg};border:${btnBdr};color:${btnFg};font-family:Arial,sans-serif;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block;padding:12px 26px;border-radius:${r};">${lb}</a>
+        <p style="font-family:Arial,sans-serif;font-size:11px;color:#aaa;margin:8px 0 0;">
+          Add to: <a href="${urls.google}" style="color:${lk}" target="_blank">Google</a> | <a href="${urls.outlook}" style="color:${lk}" target="_blank">Outlook.com</a> | <a href="${urls.ics}" style="color:${lk}">Apple / iCal</a> | <a href="${urls.yahoo}" style="color:${lk}" target="_blank">Yahoo</a>
+        </p>
+      </div>`;
+    }).join('');
+  }
+
+  // snippet
+  document.getElementById('snippetOut').textContent = buildSnippetOutput(false);
+  // full
+  document.getElementById('fullOut').textContent = buildFullEmail(false);
+}
+
+// ==================== EVENT CRUD ====================
+function renderEvList(){
+  const list = document.getElementById('evList');
+  if(!events.length){ list.innerHTML = '<div class="ev-empty">No events yet</div>'; return; }
+  list.innerHTML = events.map(ev => `
+    <div class="ev-card${editingId===ev.id?' selected':''}" onclick="editEvent(${ev.id})">
+      <div class="ev-card-title">${ev.title}</div>
+      <div class="ev-card-meta">${fmtDate(ev.start)} · ${fmtTime(ev.start)}</div>
+      <div class="ev-card-actions">
+        <button class="icon-btn" title="Edit" onclick="event.stopPropagation();editEvent(${ev.id})">✏️</button>
+        <button class="icon-btn" title="Delete" onclick="event.stopPropagation();deleteEvent(${ev.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function addEvent(){
+  editingId = null;
+  document.getElementById('formTitle').textContent = 'New Event';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fLoc').value = '';
+  document.getElementById('fDesc').value = '';
+  const now = new Date(); now.setMinutes(0,0,0);
+  const end = new Date(now.getTime()+3600000);
+  document.getElementById('fStart').value = now.toISOString().slice(0,16);
+  document.getElementById('fEnd').value   = end.toISOString().slice(0,16);
+  document.getElementById('evForm').style.display = 'block';
+}
+
+function editEvent(id){
+  const ev = events.find(e=>e.id===id);
+  if(!ev) return;
+  editingId = id;
+  document.getElementById('formTitle').textContent = 'Edit Event';
+  document.getElementById('fTitle').value = ev.title;
+  document.getElementById('fLoc').value   = ev.loc;
+  document.getElementById('fDesc').value  = ev.desc;
+  document.getElementById('fStart').value = ev.start;
+  document.getElementById('fEnd').value   = ev.end;
+  document.getElementById('evForm').style.display = 'block';
+  renderEvList();
+}
+
+function saveEvent(){
+  const title = document.getElementById('fTitle').value.trim();
+  if(!title){ alert('Please enter a title.'); return; }
+  const obj = {
+    id: editingId || nextId++,
+    title,
+    loc:   document.getElementById('fLoc').value.trim(),
+    start: document.getElementById('fStart').value,
+    end:   document.getElementById('fEnd').value,
+    desc:  document.getElementById('fDesc').value.trim(),
+  };
+  if(editingId){ const i = events.findIndex(e=>e.id===editingId); events[i]=obj; }
+  else events.push(obj);
+  editingId = null;
+  document.getElementById('evForm').style.display = 'none';
+  renderEvList(); render();
+}
+
+function cancelEdit(){
+  editingId = null;
+  document.getElementById('evForm').style.display = 'none';
+  renderEvList();
+}
+
+function deleteEvent(id){
+  events = events.filter(e=>e.id!==id);
+  if(editingId===id){ editingId=null; document.getElementById('evForm').style.display='none'; }
+  renderEvList(); render();
+}
+
+// ==================== ICS IMPORT ====================
+function parseIcs(text){
+  const evs = [];
+  const blocks = text.split('BEGIN:VEVENT');
+  for(let i=1;i<blocks.length;i++){
+    const b = blocks[i];
+    const get = key => {
+      const m = b.match(new RegExp(key+'(?:;[^:]+)?:([^\\r\\n]+)'));
+      return m ? m[1].trim().replace(/\\n/g,'\n').replace(/\\,/g,',') : '';
+    };
+    const parseIcsDate = s => {
+      if(!s) return '';
+      const clean = s.replace('Z','');
+      const yr=clean.slice(0,4),mo=clean.slice(4,6),dy=clean.slice(6,8);
+      const hr=clean.slice(9,11)||'00',mn=clean.slice(11,13)||'00';
+      return `${yr}-${mo}-${dy}T${hr}:${mn}`;
+    };
+    const title = get('SUMMARY') || 'Imported Event';
+    const start = parseIcsDate(get('DTSTART'));
+    const end   = parseIcsDate(get('DTEND')) || start;
+    const loc   = get('LOCATION');
+    const desc  = get('DESCRIPTION');
+    if(title && start) evs.push({ title, start, end, loc, desc });
+  }
+  return evs;
+}
+
+function handleIcsFile(file){
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const parsed = parseIcs(e.target.result);
+    const container = document.getElementById('importResults');
+    if(!parsed.length){ container.innerHTML = '<p style="font-size:12px;color:var(--red);">No events found in file.</p>'; return; }
+    container.innerHTML = `<p style="font-size:11px;color:var(--t3);margin-bottom:8px;">Found ${parsed.length} event${parsed.length>1?'s':''} — click to add:</p>`
+      + parsed.map((ev,i) => `
+        <div class="imp-row">
+          <div class="imp-row-info">
+            <div class="imp-row-title">${ev.title}</div>
+            <div class="imp-row-meta">${ev.start ? fmtDate(ev.start) : 'No date'}</div>
+          </div>
+          <div class="imp-row-actions">
+            <button class="btn btn-acc btn-sm" onclick="importEvent(${i})">Add</button>
+          </div>
+        </div>`).join('');
+    window._importBuffer = parsed;
+  };
+  r.readAsText(file);
+}
+
+function importEvent(i){
+  const ev = window._importBuffer?.[i];
+  if(!ev) return;
+  events.push({ id: nextId++, ...ev });
+  switchLeft('events', document.querySelector('.lt'));
+  // activate events tab
+  document.querySelectorAll('.lt').forEach((t,idx)=>{ t.classList.toggle('active', idx===0); });
+  document.querySelectorAll('.lp').forEach((p,idx)=>{ p.classList.toggle('active', idx===0); });
+  renderEvList(); render();
+}
+
+// ==================== UI HELPERS ====================
+function switchLeft(name, el){
+  document.querySelectorAll('.lt').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.lp').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('lp-'+name).classList.add('active');
+}
+
+function switchRight(name, el){
+  document.querySelectorAll('.rt').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rpanel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('rp-'+name).classList.add('active');
+}
+
+function pickStyle(el){
+  document.querySelectorAll('.so').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function syncC(textId, pickId){
+  document.getElementById(textId).value = document.getElementById(pickId).value;
+  render();
+}
+
+function pickMode(which, el){
+  const parent = document.getElementById(which+'ModeToggle');
+  parent.querySelectorAll('.mt').forEach(m=>m.classList.remove('active'));
+  el.classList.add('active');
+  if(which==='snippet') snippetMode = el.dataset.mode;
+  else fullMode = el.dataset.mode;
+  render();
+}
+
+function copyOut(which){
+  const text = which==='snippet' ? buildSnippetOutput(true) : buildFullEmail(true);
+  const btnId = which==='snippet' ? 'copySnippetBtn' : 'copyFullBtn';
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById(btnId);
+    const orig = btn.innerHTML;
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML = orig; }, 2500);
+  });
+}
+
+function dzDrag(e, on){ e.preventDefault(); document.getElementById('dropZone').classList.toggle('drag', on); }
+function dzDrop(e){ e.preventDefault(); dzDrag(e, false); const f=e.dataTransfer.files[0]; if(f) handleIcsFile(f); }
+
+function updateBadge(){
+  const b = document.getElementById('evCountBadge');
+  b.textContent = `${events.length} event${events.length!==1?'s':''}`;
+}
+
+// ---- wire color/label inputs ----
+['cBg','cFg','cLk'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{ document.getElementById(id+'P').value=document.getElementById(id).value; render(); });
+});
+
+// INIT
+renderEvList();
+render();
+</script>
+</body>
+</html>
